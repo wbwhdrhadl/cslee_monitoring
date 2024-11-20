@@ -1,33 +1,29 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { MaterialIcons } from '@expo/vector-icons'; // 파일 아이콘 추가
-
+import { MaterialIcons } from '@expo/vector-icons'; 
+import Navbar from '../components/navbar'; 
 const DownloadPage = () => {
-  // 하드코딩된 파일 이름
   const fileName = 'example_file.png';
 
   const handleDownload = () => {
-    alert('Downloading file...'); // 다운로드 버튼 클릭 시 동작
+    alert('Downloading file...'); 
   };
 
   return (
     <View style={styles.container}>
-      {/* 제목 */}
       <Text style={styles.title}>파일이 저장되었습니다</Text>
       <Text style={styles.subTitle}>파일이 성공적으로 저장되었습니다. 다운로드후 이용하세요</Text>
 
-      {/* 파일 아이콘 */}
       <View style={styles.iconContainer}>
         <MaterialIcons name="insert-drive-file" size={100} color="#555" />
       </View>
 
-      {/* 파일 이름 */}
       <Text style={styles.fileName}>File Name: {fileName}</Text>
 
-      {/* 다운로드 버튼 */}
       <Pressable style={styles.downloadButton} onPress={handleDownload}>
         <Text style={styles.downloadButtonText}>다운로드하기</Text>
       </Pressable>
+      <Navbar/>
     </View>
   );
 };

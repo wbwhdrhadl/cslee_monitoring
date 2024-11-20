@@ -10,8 +10,12 @@ const HomePage = () => {
       <Text style={styles.title}>keyword crawling</Text>
       <Text style={styles.subtitle}>키워드를 크롤링해주는 정부과제 앱입니다.</Text>
       <Button
-        title="Go to Login"
-        onPress={() => router.push('/admin')} // 로그인 페이지로 이동
+        title="로그인 하러가기"
+        onPress={() => router.push('/login')} 
+      />
+      <Button
+        title="비회원 이용"
+        onPress={() => router.push('/main')} 
       />
     </View>
   );

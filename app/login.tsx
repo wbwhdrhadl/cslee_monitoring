@@ -19,14 +19,14 @@ const LoginPage = () => {
       <TextInput
         style={styles.input}
         placeholder="Username"
-        placeholderTextColor="#888" // 플레이스홀더 글씨 색상
+        placeholderTextColor="#888" 
         value={username}
         onChangeText={setUsername}
       />
       <TextInput
         style={styles.input}
         placeholder="Password"
-        placeholderTextColor="#888" // 플레이스홀더 글씨 색상
+        placeholderTextColor="#888" 
         value={password}
         onChangeText={setPassword}
         secureTextEntry
