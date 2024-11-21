@@ -1,6 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; // 아이콘 사용
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; 
 import Navbar from '../components/navbar'; 
 const AdminPage = () => {
   const handleUserManagement = () => {
@@ -19,22 +19,17 @@ const AdminPage = () => {
     <View style={styles.container}>
 
       <Text style={styles.title}>관리자 페이지</Text>
-      <Text style={styles.subTitle}>사용자 관리, 파일, 설정을 이용하세요.</Text>
+      <Text style={styles.subTitle}>관리자를 위한 페이지 입니다</Text>
 
       <View style={styles.buttonContainer}>
         <Pressable style={styles.button} onPress={handleUserManagement}>
           <FontAwesome name="users" size={24} color="#ffffff" />
-          <Text style={styles.buttonText}>User Management</Text>
+          <Text style={styles.buttonText}>회원 정보 관리</Text>
         </Pressable>
 
         <Pressable style={styles.button} onPress={handleFileManagement}>
           <MaterialIcons name="folder" size={24} color="#ffffff" />
-          <Text style={styles.buttonText}>File Management</Text>
-        </Pressable>
-
-        <Pressable style={styles.button} onPress={handleSettings}>
-          <MaterialIcons name="settings" size={24} color="#ffffff" />
-          <Text style={styles.buttonText}>Settings</Text>
+          <Text style={styles.buttonText}>Q&A</Text>
         </Pressable>
       </View>
       <Navbar/>

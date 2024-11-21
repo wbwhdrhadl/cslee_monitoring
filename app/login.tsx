@@ -34,6 +34,9 @@ const LoginPage = () => {
       <View style={styles.buttonContainer}>
         <Button title="Login" onPress={handleLogin} color="#007BFF" />
       </View>
+      <View style={styles.buttonContainer}>
+        <Button title="sign up" onPress={handleLogin} color="#888" />
+      </View>
     </View>
   );
 };

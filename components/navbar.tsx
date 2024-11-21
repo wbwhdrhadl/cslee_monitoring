@@ -11,15 +11,16 @@ const Navbar = () => {
         <Text style={styles.navText}>Search</Text>
       </Link>
 
+      <Link href="/register" style={styles.navItem}>
+        <FontAwesome name="plus" size={24} color="#333" />
+        <Text style={styles.navText}>Register</Text>
+      </Link>
+
       <Link href="/download" style={styles.navItem}>
         <FontAwesome name="download" size={24} color="#333" />
         <Text style={styles.navText}>Download</Text>
       </Link>
 
-      <Link href="/admin" style={styles.navItem}>
-        <FontAwesome name="cog" size={24} color="#333" />
-        <Text style={styles.navText}>Settings</Text>
-      </Link>
     </View>
   );
 };

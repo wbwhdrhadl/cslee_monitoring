@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import Checkbox from 'expo-checkbox';
-import DateTimePicker from '@react-native-community/datetimepicker';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router'; // Router import
-import Navbar from '../components/navbar';
+import { MaterialIcons } from '@expo/vector-icons';
+import Navbar from '@/components/navbar';
 
-const MainPage = () => {
+const KeywordRegistrationPage = () => {
   const [keyword, setKeyword] = useState('');
-  const [keywords, setKeywords] = useState([]); // 여러 키워드를 관리
+  const [keywords, setKeywords] = useState([]);
   const [checked, setChecked] = useState({
     나라장터: false,
     나라장터사전공고: false,
@@ -20,12 +18,9 @@ const MainPage = () => {
     기업마당: false,
     스마트공장사업관리시스템: false,
   });
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
-  const [showStartPicker, setShowStartPicker] = useState(false);
-  const [showEndPicker, setShowEndPicker] = useState(false);
-
-  const router = useRouter(); 
+  const [isLoading, setIsLoading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [isComplete, setIsComplete] = useState(false);
 
   const handleAddKeyword = () => {
     if (keyword.trim()) {
@@ -38,21 +33,45 @@ const MainPage = () => {
     setKeywords((prevKeywords) => prevKeywords.filter((_, i) => i !== index));
   };
 
-  const handleSearch = () => {
+  const simulateProgress = () => {
+    let progressValue = 0;
+    setIsLoading(true);
+    setIsComplete(false);
+    setProgress(progressValue);
 
-    router.push('/result'); 
+    const interval = setInterval(() => {
+      progressValue += 10;
+      setProgress(progressValue);
+
+      if (progressValue >= 100) {
+        clearInterval(interval);
+        setIsLoading(false);
+        setIsComplete(true);
+      }
+    }, 300); // 300ms마다 진행률 증가
+  };
+
+  const handleRegister = () => {
+    const selectedSources = Object.keys(checked).filter((key) => checked[key]);
+
+    if (keywords.length === 0 || selectedSources.length === 0) {
+      alert('키워드와 사이트를 선택해주세요.');
+      return;
+    }
+
+    simulateProgress(); // 진행 상황 표시
   };
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>키워드 검색</Text>
+        <Text style={styles.title}>키워드 등록</Text>
 
+        {/* 키워드 입력 */}
         <View style={styles.searchInputContainer}>
-          <FontAwesome name="search" size={20} color="#888" style={styles.searchIcon} />
           <TextInput
             style={styles.input}
-            placeholder="검색할 키워드를 입력해주세요"
+            placeholder="등록할 키워드를 입력해주세요"
             placeholderTextColor="#888"
             value={keyword}
             onChangeText={setKeyword}
@@ -77,7 +96,7 @@ const MainPage = () => {
           </View>
         </View>
 
-        {/* 사이트 선택 */}
+        {/* 체크박스 */}
         <View style={styles.checkboxContainer}>
           <Text style={styles.sectionTitle}>포함할 사이트를 선택해주세요</Text>
           {Object.keys(checked).map((source) => (
@@ -98,49 +117,31 @@ const MainPage = () => {
           ))}
         </View>
 
-        {/* 기간 선택 */}
-        <View style={styles.datePickerContainer}>
-          <Text style={styles.sectionTitle}>기간을 선택해주세요</Text>
-          <View style={styles.dateRow}>
-            {/* 시작 날짜 */}
-            <Pressable style={styles.dateButton} onPress={() => setShowStartPicker(true)}>
-              <Text style={styles.dateText}>Start: {startDate.toDateString()}</Text>
-              <MaterialIcons name="calendar-today" size={24} color="#333333" />
-            </Pressable>
-            {showStartPicker && (
-              <DateTimePicker
-                value={startDate}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowStartPicker(false);
-                  if (selectedDate) setStartDate(selectedDate);
-                }}
-              />
-            )}
-
-            {/* 종료 날짜 */}
-            <Pressable style={styles.dateButton} onPress={() => setShowEndPicker(true)}>
-              <Text style={styles.dateText}>End: {endDate.toDateString()}</Text>
-              <MaterialIcons name="calendar-today" size={24} color="#333333" />
-            </Pressable>
-            {showEndPicker && (
-              <DateTimePicker
-                value={endDate}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowEndPicker(false);
-                  if (selectedDate) setEndDate(selectedDate);
-                }}
-              />
-            )}
-          </View>
-        </View>
-        <Pressable onPress={handleSearch} style={styles.searchButton}>
-          <Text style={styles.searchButtonText}>Search</Text>
+        {/* 등록 버튼 */}
+        <Pressable onPress={handleRegister} style={styles.registerButton} disabled={isLoading}>
+          <Text style={styles.registerButtonText}>
+            {isLoading ? '등록 중...' : '키워드 등록'}
+          </Text>
         </Pressable>
+
+        {/* 진행 상황 */}
+        {isLoading && (
+          <View style={styles.progressContainer}>
+            <ActivityIndicator size="large" color="#2563eb" />
+            <Text style={styles.progressText}>등록 진행 중... {progress}%</Text>
+          </View>
+        )}
+
+        {/* 완료 메시지 */}
+        {isComplete && (
+          <View style={styles.completeContainer}>
+            <Text style={styles.completeText}>🎉 키워드 등록이 완료되었습니다!</Text>
+            <Text style={styles.completeText}>다운로드함을 확인하세요</Text>
+          </View>
+        )}
       </ScrollView>
+
+      {/* Navbar 추가 */}
       <Navbar />
     </View>
   );
@@ -152,7 +153,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   scrollContent: {
-    padding: 10,
+    padding: 20,
   },
   title: {
     fontSize: 32,
@@ -169,10 +170,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     backgroundColor: '#ffffff',
     padding: 10,
-    marginBottom: 10,
-  },
-  searchIcon: {
-    marginRight: 10,
+    marginBottom: 20,
   },
   input: {
     flex: 1,
@@ -180,7 +178,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginLeft: 10,
-    backgroundColor: '#555555', // 어두운 회색
+    backgroundColor: '#555555',
     padding: 10,
     borderRadius: 5,
   },
@@ -196,7 +194,7 @@ const styles = StyleSheet.create({
   },
   keywordGrid: {
     flexDirection: 'row',
-    flexWrap: 'wrap', 
+    flexWrap: 'wrap',
     gap: 10,
   },
   keywordItem: {
@@ -237,44 +235,36 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#4b5563',
   },
-  datePickerContainer: {
-    marginBottom: 10,
-    padding: 10,
-    backgroundColor: '#ffffff',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#d1d5db',
-  },
-  dateRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  dateButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: '#e5e7eb',
-    borderRadius: 10,
-    flex: 1,
-    marginHorizontal: 5,
-  },
-  dateText: {
-    fontSize: 16,
-    color: '#374151',
-    marginRight: 5,
-  },
-  searchButton: {
+  registerButton: {
     backgroundColor: '#333333',
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    marginTop: 20,
   },
-  searchButtonText: {
+  registerButtonText: {
     fontSize: 18,
     color: '#ffffff',
     fontWeight: 'bold',
   },
+  progressContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  progressText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: '#2563eb',
+  },
+  completeContainer: {
+    marginTop: 20,
+    alignItems: 'center',
+  },
+  completeText: {
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#16a34a',
+  },
 });
 
-export default MainPage;
+export default KeywordRegistrationPage;
