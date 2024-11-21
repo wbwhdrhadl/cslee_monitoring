@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, TextInput, Button } from 'react-native';
+import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 
@@ -7,6 +7,39 @@ const HomePage = () => {
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [password, setPassword] = useState('');
   const router = useRouter();
+
+  const handleLogin = async () => {
+    if (!selectedDepartment || !password) {
+      Alert.alert('Error', '부서와 비밀번호를 입력하세요.');
+      return;
+    }
+
+    try {
+      const response = await fetch('http://192.168.0.2:5001/api/auth', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          departmentName: selectedDepartment,
+          password: password,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        Alert.alert('cslee 직원 여러분 안녕하세요😀', "오늘도 좋은 하루 보내세요", [
+          { text: 'OK', onPress: () => router.push('/main') },
+        ]);
+      } else {
+        Alert.alert('비밀번호를 확인해주세요', "문제가 계속발생시 AI바우처 부서로 문의해주세요");
+      }
+    } catch (error) {
+      console.error('Error during login:', error);
+      Alert.alert('Error', '서버에 문제가 발생했습니다.');
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -19,22 +52,22 @@ const HomePage = () => {
           selectedValue={selectedDepartment}
           onValueChange={(itemValue) => setSelectedDepartment(itemValue)}
           style={styles.picker}
-          itemStyle={styles.pickerItem} 
+          itemStyle={styles.pickerItem}
         >
-          <Picker.Item label="부서를 선택하세요" value="부서" />
+          <Picker.Item label="부서를 선택하세요" value={null} />
           <Picker.Item label="데이터 컨설팅 부서" value="데이터 컨설팅 부서" />
           <Picker.Item label="QA부서" value="QA" />
           <Picker.Item label="CEO" value="CEO" />
-          <Picker.Item label="빅데이터 부서" value="빅데이터" />
-          <Picker.Item label="AI부서" value="AI" />
-          <Picker.Item label="CEO" value="CEO" />
+          <Picker.Item label="빅데이터 부서" value="빅데이터 부서" />
+          <Picker.Item label="AI부서" value="AI부서" />
+          <Picker.Item label="관리자" value="관리자" />
         </Picker>
       </View>
 
       {selectedDepartment && (
         <View style={styles.passwordContainer}>
           <Text style={styles.inputLabel}>
-            {selectedDepartment} 부서 비밀번호를 입력하세요:
+            {selectedDepartment} 부서 비밀번호를 입력하세요
           </Text>
           <TextInput
             style={styles.input}
@@ -43,11 +76,7 @@ const HomePage = () => {
             value={password}
             onChangeText={setPassword}
           />
-          <Button
-            title="확인"
-            onPress={() => router.push('/main')}
-            disabled={!password} // Disable button if password is empty
-          />
+          <Button title="확인" onPress={handleLogin} disabled={!password} />
         </View>
       )}
     </View>
@@ -87,7 +116,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   pickerItem: {
-    color: '#000', // 글씨를 검은색으로 설정
+    color: '#000',
     fontSize: 16,
   },
   passwordContainer: {

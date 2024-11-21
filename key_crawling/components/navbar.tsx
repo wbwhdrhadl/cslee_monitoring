@@ -21,6 +21,10 @@ const Navbar = () => {
         <Text style={styles.navText}>Download</Text>
       </Link>
 
+      <Link href="/admin" style={styles.navItem}>
+        <FontAwesome name="cog" size={24} color="#333" />
+        <Text style={styles.navText}>Admin</Text>
+      </Link>
     </View>
   );
 };

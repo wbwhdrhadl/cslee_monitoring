@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView,Alert } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
@@ -8,7 +8,7 @@ import Navbar from '../components/navbar';
 
 const MainPage = () => {
   const [keyword, setKeyword] = useState('');
-  const [keywords, setKeywords] = useState([]); // 여러 키워드를 관리
+  const [keywords, setKeywords] = useState([]); 
   const [checked, setChecked] = useState({
     나라장터: false,
     나라장터사전공고: false,
@@ -119,23 +119,18 @@ const MainPage = () => {
             )}
 
             {/* 종료 날짜 */}
-            <Pressable style={styles.dateButton} onPress={() => setShowEndPicker(true)}>
+            <Pressable
+              style={[styles.dateButton, { backgroundColor: '#e5e7eb' }]} // 비활성화 버튼 스타일
+              onPress={() => {
+                Alert.alert('알림', '종료 날짜 변경은 현재 기능 개선 중입니다.');
+              }}
+            >
               <Text style={styles.dateText}>End: {endDate.toDateString()}</Text>
               <MaterialIcons name="calendar-today" size={24} color="#333333" />
             </Pressable>
-            {showEndPicker && (
-              <DateTimePicker
-                value={endDate}
-                mode="date"
-                display="default"
-                onChange={(event, selectedDate) => {
-                  setShowEndPicker(false);
-                  if (selectedDate) setEndDate(selectedDate);
-                }}
-              />
-            )}
           </View>
         </View>
+
         <Pressable onPress={handleSearch} style={styles.searchButton}>
           <Text style={styles.searchButtonText}>Search</Text>
         </Pressable>

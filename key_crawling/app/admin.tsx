@@ -1,23 +1,22 @@
 import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons'; 
-import Navbar from '../components/navbar'; 
+import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
+import { useRouter } from 'expo-router'; // Router 사용
+import Navbar from '../components/navbar';
+
 const AdminPage = () => {
+  const router = useRouter(); // Router 사용
+
   const handleUserManagement = () => {
-    alert('Navigating to User Management...');
+    router.push('/department'); // department 페이지로 이동
   };
 
   const handleFileManagement = () => {
     alert('Navigating to File Management...');
   };
 
-  const handleSettings = () => {
-    alert('Navigating to Settings...');
-  };
-
   return (
     <View style={styles.container}>
-
       <Text style={styles.title}>관리자 페이지</Text>
       <Text style={styles.subTitle}>관리자를 위한 페이지 입니다</Text>
 
@@ -32,7 +31,7 @@ const AdminPage = () => {
           <Text style={styles.buttonText}>Q&A</Text>
         </Pressable>
       </View>
-      <Navbar/>
+      <Navbar />
     </View>
   );
 };
@@ -64,7 +63,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'flex-start',
-    backgroundColor: '#333333', 
+    backgroundColor: '#333333',
     padding: 15,
     marginVertical: 10,
     borderRadius: 10,
