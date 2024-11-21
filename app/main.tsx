@@ -62,7 +62,6 @@ const MainPage = () => {
           </Pressable>
         </View>
 
-        {/* 추가된 키워드 리스트 */}
         <View style={styles.keywordListContainer}>
           <Text style={styles.sectionTitle}>추가된 키워드</Text>
           <View style={styles.keywordGrid}>

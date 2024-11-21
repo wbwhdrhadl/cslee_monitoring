@@ -6,7 +6,6 @@ import Navbar from '../components/navbar';
 const DownloadPage = () => {
   const [modalVisible, setModalVisible] = useState(false);
 
-  // CSV 파일 데이터
   const files = [
     { csv_id: '1', user_id: '101', file_name: 'document1.csv', save_time: '2024-11-20 10:30:00' },
     { csv_id: '2', user_id: '102', file_name: 'data_analysis.csv', save_time: '2024-11-20 11:00:00' },

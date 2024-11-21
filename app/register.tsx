@@ -48,7 +48,7 @@ const KeywordRegistrationPage = () => {
         setIsLoading(false);
         setIsComplete(true);
       }
-    }, 300); // 300ms마다 진행률 증가
+    }, 300); 
   };
 
   const handleRegister = () => {
@@ -59,7 +59,7 @@ const KeywordRegistrationPage = () => {
       return;
     }
 
-    simulateProgress(); // 진행 상황 표시
+    simulateProgress(); 
   };
 
   return (
@@ -67,7 +67,7 @@ const KeywordRegistrationPage = () => {
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>키워드 등록</Text>
 
-        {/* 키워드 입력 */}
+
         <View style={styles.searchInputContainer}>
           <TextInput
             style={styles.input}
@@ -81,7 +81,6 @@ const KeywordRegistrationPage = () => {
           </Pressable>
         </View>
 
-        {/* 추가된 키워드 리스트 */}
         <View style={styles.keywordListContainer}>
           <Text style={styles.sectionTitle}>추가된 키워드</Text>
           <View style={styles.keywordGrid}>
@@ -96,7 +95,6 @@ const KeywordRegistrationPage = () => {
           </View>
         </View>
 
-        {/* 체크박스 */}
         <View style={styles.checkboxContainer}>
           <Text style={styles.sectionTitle}>포함할 사이트를 선택해주세요</Text>
           {Object.keys(checked).map((source) => (
@@ -117,14 +115,12 @@ const KeywordRegistrationPage = () => {
           ))}
         </View>
 
-        {/* 등록 버튼 */}
         <Pressable onPress={handleRegister} style={styles.registerButton} disabled={isLoading}>
           <Text style={styles.registerButtonText}>
             {isLoading ? '등록 중...' : '키워드 등록'}
           </Text>
         </Pressable>
 
-        {/* 진행 상황 */}
         {isLoading && (
           <View style={styles.progressContainer}>
             <ActivityIndicator size="large" color="#2563eb" />
@@ -132,7 +128,6 @@ const KeywordRegistrationPage = () => {
           </View>
         )}
 
-        {/* 완료 메시지 */}
         {isComplete && (
           <View style={styles.completeContainer}>
             <Text style={styles.completeText}>🎉 키워드 등록이 완료되었습니다!</Text>
@@ -140,8 +135,6 @@ const KeywordRegistrationPage = () => {
           </View>
         )}
       </ScrollView>
-
-      {/* Navbar 추가 */}
       <Navbar />
     </View>
   );

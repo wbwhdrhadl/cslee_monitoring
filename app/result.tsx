@@ -60,7 +60,7 @@ const resultPage = () => {
         ))}
       </ScrollView>
 
-      {/* 팝업 */}
+
       {selectedItem && (
         <View style={styles.popupOverlay}>
           <View style={styles.popupContainer}>
