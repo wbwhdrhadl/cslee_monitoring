@@ -3,7 +3,7 @@ import { View, Text, TextInput, StyleSheet, Pressable, ScrollView } from 'react-
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router'; // Router import
+import { useRouter } from 'expo-router'; 
 import Navbar from '../components/navbar';
 
 const MainPage = () => {

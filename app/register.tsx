@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import { MaterialIcons } from '@expo/vector-icons';
-import Navbar from '@/components/navbar';
+import Navbar from '../components/navbar';
 
 const KeywordRegistrationPage = () => {
   const [keyword, setKeyword] = useState('');
