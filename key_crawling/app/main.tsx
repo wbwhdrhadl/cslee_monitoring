@@ -103,7 +103,7 @@ const MainPage = () => {
           <View style={styles.dateRow}>
             {/* 시작 날짜 */}
             <Pressable style={styles.dateButton} onPress={() => setShowStartPicker(true)}>
-              <Text style={styles.dateText}>Start: {startDate.toDateString()}</Text>
+              <Text style={styles.dateText}>{startDate.toDateString()}</Text>
               <MaterialIcons name="calendar-today" size={24} color="#333333" />
             </Pressable>
             {showStartPicker && (
@@ -125,7 +125,7 @@ const MainPage = () => {
                 Alert.alert('알림', '종료 날짜 변경은 현재 기능 개선 중입니다.');
               }}
             >
-              <Text style={styles.dateText}>End: {endDate.toDateString()}</Text>
+              <Text style={styles.dateText}>{endDate.toDateString()}</Text>
               <MaterialIcons name="calendar-today" size={24} color="#333333" />
             </Pressable>
           </View>
@@ -149,7 +149,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   title: {
-    fontSize: 32,
+    fontSize: 25,
     fontWeight: 'bold',
     marginBottom: 30,
     color: '#1f2937',
@@ -164,6 +164,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     padding: 10,
     marginBottom: 10,
+
   },
   searchIcon: {
     marginRight: 10,
@@ -174,7 +175,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     marginLeft: 10,
-    backgroundColor: '#555555', // 어두운 회색
+    backgroundColor: '#555555', 
     padding: 10,
     borderRadius: 5,
   },
@@ -183,7 +184,7 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 15,
     fontWeight: 'bold',
     marginBottom: 15,
     color: '#111827',

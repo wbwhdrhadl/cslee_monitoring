@@ -8,22 +8,22 @@ const Navbar = () => {
     <View style={styles.navbar}>
       <Link href="/main" style={styles.navItem}>
         <FontAwesome name="search" size={24} color="#333" />
-        <Text style={styles.navText}>Search</Text>
+        {/* <Text style={styles.navText}>Search</Text> */}
       </Link>
 
       <Link href="/register" style={styles.navItem}>
         <FontAwesome name="plus" size={24} color="#333" />
-        <Text style={styles.navText}>Register</Text>
+        {/* <Text style={styles.navText}>Register</Text> */}
       </Link>
 
       <Link href="/download" style={styles.navItem}>
         <FontAwesome name="download" size={24} color="#333" />
-        <Text style={styles.navText}>Download</Text>
+        {/* <Text style={styles.navText}>Download</Text> */}
       </Link>
 
       <Link href="/admin" style={styles.navItem}>
         <FontAwesome name="cog" size={24} color="#333" />
-        <Text style={styles.navText}>Admin</Text>
+        {/* <Text style={styles.navText}>Admin</Text> */}
       </Link>
     </View>
   );
@@ -50,7 +50,7 @@ const styles = StyleSheet.create({
   navText: {
     fontSize: 12,
     color: '#333',
-    marginTop: 8,
+    marginTop: 8
   },
 });
 
