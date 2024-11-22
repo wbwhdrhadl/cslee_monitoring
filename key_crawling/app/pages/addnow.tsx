@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView,Alert } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, Alert, ActivityIndicator } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; 
-import Navbar from '../components/navbar';
 
 const MainPage = () => {
   const [keyword, setKeyword] = useState('');
@@ -24,6 +23,8 @@ const MainPage = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [showResultButton, setShowResultButton] = useState(false);
 
   const router = useRouter(); 
 
@@ -39,8 +40,16 @@ const MainPage = () => {
   };
 
   const handleSearch = () => {
+    setIsLoading(true); // 로딩 상태 활성화
+    setTimeout(() => {
+      setIsLoading(false); // 로딩 상태 비활성화
+      setShowResultButton(true); // 결과 버튼 표시
+      Alert.alert('키워드 검색 완료', '키워드가 검색되었습니다.');
+    }, 3000); // 2초 후에 로딩 완료 처리
+  };
 
-    router.push('/result'); 
+  const navigateToRegister = () => {
+    router.push('../result'); // /register 페이지로 이동
   };
 
   return (
@@ -97,11 +106,9 @@ const MainPage = () => {
           ))}
         </View>
 
-        {/* 기간 선택 */}
         <View style={styles.datePickerContainer}>
           <Text style={styles.sectionTitle}>기간을 선택해주세요</Text>
           <View style={styles.dateRow}>
-            {/* 시작 날짜 */}
             <Pressable style={styles.dateButton} onPress={() => setShowStartPicker(true)}>
               <Text style={styles.dateText}>{startDate.toDateString()}</Text>
               <MaterialIcons name="calendar-today" size={24} color="#333333" />
@@ -118,7 +125,6 @@ const MainPage = () => {
               />
             )}
 
-            {/* 종료 날짜 */}
             <Pressable
               style={[styles.dateButton, { backgroundColor: '#e5e7eb' }]} // 비활성화 버튼 스타일
               onPress={() => {
@@ -132,10 +138,19 @@ const MainPage = () => {
         </View>
 
         <Pressable onPress={handleSearch} style={styles.searchButton}>
-          <Text style={styles.searchButtonText}>Search</Text>
+          {isLoading ? (
+            <ActivityIndicator size="small" color="#ffffff" />
+          ) : (
+            <Text style={styles.searchButtonText}>키워드 검색</Text>
+          )}
         </Pressable>
+
+        {showResultButton && (
+          <Pressable onPress={navigateToRegister} style={styles.resultButton}>
+            <Text style={styles.resultButtonText}>검색 결과 보러가기</Text>
+          </Pressable>
+        )}
       </ScrollView>
-      <Navbar />
     </View>
   );
 };
@@ -146,7 +161,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   scrollContent: {
-    padding: 10,
+    padding: 20,
   },
   title: {
     fontSize: 25,
@@ -164,7 +179,6 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
     padding: 10,
     marginBottom: 10,
-
   },
   searchIcon: {
     marginRight: 10,
@@ -264,8 +278,21 @@ const styles = StyleSheet.create({
     padding: 15,
     borderRadius: 10,
     alignItems: 'center',
+    marginBottom: 10,
   },
   searchButtonText: {
+    fontSize: 18,
+    color: '#ffffff',
+    fontWeight: 'bold',
+  },
+  resultButton: {
+    backgroundColor: '#555555',
+    padding: 15,
+    borderRadius: 10,
+    alignItems: 'center',
+    marginTop: 10,
+  },
+  resultButtonText: {
     fontSize: 18,
     color: '#ffffff',
     fontWeight: 'bold',

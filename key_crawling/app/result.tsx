@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, ScrollView, Pressable } from 'react-native';
-import Navbar from '../components/navbar';
+import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { useRouter } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
 
-const resultPage = () => {
+const ResultPage = () => {
+  const router = useRouter();
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const csvData = [
     {
@@ -31,10 +34,7 @@ const resultPage = () => {
       계약방법: '일반(총액)협상에의한계약',
       공고문URL: 'https://www.g2b.go.kr:8081/ep/invitation/publish/bidInfoDtl.do?bidno=20241023863&bidseq=00&releaseYn=Y&taskClCd=5',
     },
-
   ];
-
-  const [selectedItem, setSelectedItem] = useState(null);
 
   const handleSelectItem = (item) => {
     setSelectedItem(item);
@@ -46,6 +46,10 @@ const resultPage = () => {
 
   return (
     <View style={styles.container}>
+      <Pressable style={styles.topCloseButton} onPress={() => router.back()}>
+        <FontAwesome name="close" size={24} color="#333" />
+      </Pressable>
+
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>키워드 포함 공고</Text>
         {csvData.map((item, index) => (
@@ -56,11 +60,13 @@ const resultPage = () => {
           >
             <Text style={styles.listItemText}>{item.공고명}</Text>
             <Text style={styles.listItemSubtitle}>{item.공고기관}</Text>
+            <Text style={styles.listItemSubtitle}>{item.공고일}</Text>
+            <Text style={styles.listItemSubtitle}>{item.사업예산}</Text>
           </Pressable>
         ))}
       </ScrollView>
 
-
+      {/* 팝업 */}
       {selectedItem && (
         <View style={styles.popupOverlay}>
           <View style={styles.popupContainer}>
@@ -113,8 +119,6 @@ const resultPage = () => {
           </View>
         </View>
       )}
-
-      <Navbar />
     </View>
   );
 };
@@ -195,6 +199,12 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: 'bold',
   },
+  topCloseButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
+  },
 });
 
-export default resultPage;
+export default ResultPage;

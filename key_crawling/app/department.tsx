@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, Alert, StyleSheet, Pressable } from 'react-native';
+import { useRouter } from 'expo-router';
+import { FontAwesome } from '@expo/vector-icons';
 
 const UserManagementPage = () => {
   const [departmentName, setDepartmentName] = useState('');
@@ -10,6 +12,8 @@ const UserManagementPage = () => {
   const [newDepartmentPassword, setNewDepartmentPassword] = useState('');
 
   const [deleteDepartment, setDeleteDepartment] = useState('');
+
+  const router = useRouter(); // 네비게이션 사용
 
   const handlePasswordChange = async () => {
     if (!departmentName || !currentPassword || !newPassword) {
@@ -42,7 +46,6 @@ const UserManagementPage = () => {
       Alert.alert('오류 발생', '서버에 문제가 발생했습니다.');
     }
   };
-
 
   const handleRegistration = async () => {
     if (!newDepartment || !newDepartmentPassword) {
@@ -95,9 +98,9 @@ const UserManagementPage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert('부서가 삭제 성공!', "성공적으로 부서가 삭제되었습니다.");
+        Alert.alert('부서 삭제 성공!', "성공적으로 부서가 삭제되었습니다.");
       } else {
-        Alert.alert('오류 발생', "부서 삭제중 오류가 발생햇습니다.");
+        Alert.alert('오류 발생', "부서 삭제 중 오류가 발생했습니다.");
       }
     } catch (error) {
       console.error('Error during deletion:', error);
@@ -107,8 +110,12 @@ const UserManagementPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>회원 정보 관리</Text>
+      {/* 뒤로가기 X 버튼 */}
+      <Pressable style={styles.closeButton} onPress={() => router.back()}>
+        <FontAwesome name="close" size={24} color="#333" />
+      </Pressable>
 
+      <Text style={styles.title}>회원 정보 관리</Text>
 
       <Text style={styles.sectionTitle}>비밀번호 변경</Text>
       <TextInput
@@ -158,7 +165,6 @@ const UserManagementPage = () => {
         <Text style={styles.buttonText}>회원가입</Text>
       </Pressable>
 
-
       <Text style={styles.sectionTitle}>부서 삭제</Text>
       <TextInput
         style={styles.input}
@@ -179,6 +185,12 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     backgroundColor: '#f5f5f5',
+  },
+  closeButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+    zIndex: 10,
   },
   title: {
     fontSize: 24,

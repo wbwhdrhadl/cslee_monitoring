@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 
-const HomePage = () => {
+const LoginPage = () => {
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [password, setPassword] = useState('');
   const router = useRouter();
@@ -29,11 +29,13 @@ const HomePage = () => {
       const data = await response.json();
 
       if (response.ok) {
-        Alert.alert('cslee 직원 여러분 안녕하세요😀', "오늘도 좋은 하루 보내세요", [
-          { text: 'OK', onPress: () => router.push('/main') },
-        ]);
+        Alert.alert(
+          'cslee 직원 여러분 안녕하세요😀',
+          "오늘도 좋은 하루 보내세요",
+          [{ text: 'OK', onPress: () => router.push('/pages/main') }]
+        );
       } else {
-        Alert.alert('비밀번호를 확인해주세요', "문제가 계속발생시 AI바우처 부서로 문의해주세요");
+        Alert.alert('비밀번호를 확인해주세요', '문제가 계속 발생 시 AI바우처 부서로 문의해주세요');
       }
     } catch (error) {
       console.error('Error during login:', error);
@@ -76,7 +78,7 @@ const HomePage = () => {
             value={password}
             onChangeText={setPassword}
           />
-          <Button title="확인" onPress={handleLogin} disabled={!password} />
+          <Button title="로그인" onPress={handleLogin} disabled={!password} />
         </View>
       )}
     </View>
@@ -139,4 +141,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default HomePage;
+export default LoginPage;
