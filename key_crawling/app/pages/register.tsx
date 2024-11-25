@@ -41,10 +41,8 @@ const KeywordRegistrationPage = () => {
   
       if (response.ok) {
         const data = await response.json();
-        alert(`${site}에 키워드가 성공적으로 추가되었습니다.`);
       } else {
         const data = await response.json();
-        alert(data.detail || '키워드 추가 중 문제가 발생했습니다.');
       }
     } catch (error) {
       console.error('Error adding keyword:', error);
@@ -68,7 +66,6 @@ const KeywordRegistrationPage = () => {
       });
 
       if (response.ok) {
-        Alert.alert('성공', `${site}에서 키워드가 삭제되었습니다.`);
       } else {
         const data = await response.json();
         Alert.alert('오류', data.detail || '키워드 삭제 중 문제가 발생했습니다.');
