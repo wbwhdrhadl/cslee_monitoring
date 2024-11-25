@@ -3,8 +3,7 @@ import { View, Text, TextInput, StyleSheet, Pressable, ScrollView,Alert } from '
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router'; 
-
+import { useRouter,useLocalSearchParams } from 'expo-router'; 
 
 const MainPage = () => {
   const [keyword, setKeyword] = useState('');
@@ -24,9 +23,10 @@ const MainPage = () => {
   const [endDate, setEndDate] = useState(new Date());
   const [showStartPicker, setShowStartPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-
+  const [loading, setLoading] = useState(false);
+  const [results, setResults] = useState([]);
   const router = useRouter(); 
-
+  const { user_id } = useLocalSearchParams();
   const handleAddKeyword = () => {
     if (keyword.trim()) {
       setKeywords((prevKeywords) => [...prevKeywords, keyword.trim()]);
@@ -38,10 +38,53 @@ const MainPage = () => {
     setKeywords((prevKeywords) => prevKeywords.filter((_, i) => i !== index));
   };
 
-  const handleSearch = () => {
-
-    router.push('/result'); 
+  const handleSearch = async () => {
+    const selectedSites = Object.keys(checked).filter((site) => checked[site]);
+  
+    if (keywords.length === 0 || selectedSites.length === 0) {
+      Alert.alert('오류 발생', '키워드와 사이트를 선택해주세요.');
+      return;
+    }
+  
+    try {
+      const queryParams = new URLSearchParams({
+        user_id: user_id,
+        start_date: startDate.toISOString(),
+        end_date: endDate.toISOString(),
+      });
+  
+      const response = await fetch(
+        `http://192.168.0.4:5001/search_results/?${queryParams.toString()}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            keywords, // request body
+            site_names: selectedSites, // request body
+          }),
+        }
+      );
+  
+      const data = await response.json();
+  
+      if (response.ok) {
+        router.push({
+          pathname: '/result',
+          params: {
+            results: JSON.stringify(data), 
+          },
+        });
+      } else {
+        Alert.alert('조회 실패', data.detail || '데이터를 조회할 수 없습니다.');
+      }
+    } catch (error) {
+      console.error('Error fetching results:', error);
+      Alert.alert('오류 발생', '서버에 문제가 발생했습니다.');
+    }
   };
+  
 
   return (
     <View style={styles.container}>
@@ -49,7 +92,7 @@ const MainPage = () => {
         <Text style={styles.title}>키워드 조회</Text>
 
         <View style={styles.searchInputContainer}>
-          <FontAwesome name="search" size={20} color="#888" style={styles.searchIcon} />
+          <FontAwesome name="키워드 조회" size={20} color="#888" style={styles.searchIcon} />
           <TextInput
             style={styles.input}
             placeholder="조회할 키워드를 입력해주세요"

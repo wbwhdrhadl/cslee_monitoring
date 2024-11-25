@@ -8,6 +8,7 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const router = useRouter();
 
+
   const handleLogin = async () => {
     if (!selectedDepartment || !password) {
       Alert.alert('Error', '부서와 비밀번호를 입력하세요.');
@@ -15,7 +16,6 @@ const LoginPage = () => {
     }
   
     try {
-      // URL에 쿼리 매개변수 추가
       const url = `http://192.168.0.4:5001/departments_auth/?department_name=${encodeURIComponent(
         selectedDepartment
       )}&password=${encodeURIComponent(password)}`;
@@ -32,7 +32,36 @@ const LoginPage = () => {
         Alert.alert(
           'cslee 직원 여러분 안녕하세요😀',
           "오늘도 좋은 하루 보내세요",
-          [{ text: 'OK', onPress: () => router.push('/pages/main') }]
+          [
+            {
+              text: 'OK',
+              onPress: async () => {
+                try {
+                  const userIdResponse = await fetch(
+                    `http://192.168.0.4:5001/get_user_id/?department_name=${encodeURIComponent(
+                      selectedDepartment
+                    )}`
+                  );
+                  const userIdData = await userIdResponse.json();
+  
+                  if (userIdResponse.ok) {
+                    // user_id를 router에 전달하여 페이지 이동
+                    router.push({
+                      pathname: '/pages/main',
+                      params: {
+                        user_id: userIdData.user_id, // user_id 전달
+                      },
+                    });
+                  } else {
+                    Alert.alert('Error', userIdData.detail || 'user_id를 가져오는 데 실패했습니다.');
+                  }
+                } catch (userIdError) {
+                  console.error('Error fetching user_id:', userIdError);
+                  Alert.alert('Error', 'user_id를 가져오는 중 문제가 발생했습니다.');
+                }
+              },
+            },
+          ]
         );
       } else {
         Alert.alert('비밀번호를 확인해주세요', '문제가 계속 발생 시 AI바우처 부서로 문의해주세요');

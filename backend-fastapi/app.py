@@ -103,6 +103,15 @@ def update_department_password(
 
     return {"message": f"부서 '{department_to_update.name}'의 비밀번호가 성공적으로 변경되었습니다."}
 
+# user-id가져오기
+@app.get("/get_user_id/")
+def get_user_id(department_name: str, db: Session = Depends(get_db)):
+    department = db.query(Department).filter(Department.name == department_name).first()
+
+    if not department:
+        raise HTTPException(status_code=404, detail="부서를 찾을 수 없습니다.")
+
+    return {"user_id": department.user_id}
 ################################################
 
 
@@ -171,6 +180,7 @@ def delete_keyword(delete_data: keyword, db: Session = Depends(get_db)):
 def get_search_results(
     user_id: str, 
     keywords: List[str],  
+    site_names: List[str],
     start_date: datetime, 
     end_date: datetime,
     db: Session = Depends(get_db)
@@ -182,6 +192,8 @@ def get_search_results(
         SearchResult.site_name.in_(site_names),  
         SearchResult.announcement_date.between(start_date, end_date) 
     ).all()
+
+    print(results)
 
     if not results:
         raise HTTPException(status_code=404, detail="일치하는 데이터를 찾을 수 없습니다.")

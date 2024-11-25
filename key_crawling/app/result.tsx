@@ -1,40 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
-import { useRouter } from 'expo-router';
+import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
+import { Linking } from 'react-native'; 
 
 const ResultPage = () => {
-  const router = useRouter();
-  const [selectedItem, setSelectedItem] = useState(null);
+  const router = useRouter(); // router 정의
+  const { results } = useLocalSearchParams(); // 전달받은 params에서 데이터 추출
+  const [data, setData] = useState([]);
 
-  const csvData = [
-    {
-      구분: '나라장터',
-      검색키워드: 'AI',
-      업무: '용역',
-      분류: '변경',
-      공고일: '2024-10-22',
-      공고명: '(24F058-G) AI기반 경계작전체계 통합관제 기술 실증',
-      공고기관: '국방부 국군재정관리단',
-      마감일시: '2024-10-29 10:00',
-      사업예산: '797,555,260원',
-      계약방법: '일반(총액)협상에의한계약',
-      공고문URL: 'https://www.g2b.go.kr:8081/ep/invitation/publish/bidInfoDtl.do?bidno=20240909177&bidseq=01&releaseYn=Y&taskClCd=5',
-    },
-    {
-      구분: '나라장터',
-      검색키워드: 'AI',
-      업무: '용역',
-      분류: '일반',
-      공고일: '2024-10-22',
-      공고명: '재공고)혁신2유형 산학연동형 AIESG 플랫폼 및 모바일 앱 구축',
-      공고기관: '신성대학',
-      마감일시: '2024-10-30 10:30',
-      사업예산: '200,000,000원',
-      계약방법: '일반(총액)협상에의한계약',
-      공고문URL: 'https://www.g2b.go.kr:8081/ep/invitation/publish/bidInfoDtl.do?bidno=20241023863&bidseq=00&releaseYn=Y&taskClCd=5',
-    },
-  ];
+  useEffect(() => {
+    if (results) {
+      setData(JSON.parse(results)); // JSON 문자열을 객체로 변환
+    }
+  }, [results]);
+
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const handleSelectItem = (item) => {
     setSelectedItem(item);
@@ -52,66 +33,74 @@ const ResultPage = () => {
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>키워드 포함 공고</Text>
-        {csvData.map((item, index) => (
-          <Pressable
-            key={index}
-            style={styles.listItem}
-            onPress={() => handleSelectItem(item)}
-          >
-            <Text style={styles.listItemText}>{item.공고명}</Text>
-            <Text style={styles.listItemSubtitle}>{item.공고기관}</Text>
-            <Text style={styles.listItemSubtitle}>{item.공고일}</Text>
-            <Text style={styles.listItemSubtitle}>{item.사업예산}</Text>
-          </Pressable>
-        ))}
+        {data.length > 0 ? (
+          data.map((item, index) => (
+            <Pressable
+              key={index}
+              style={styles.listItem}
+              onPress={() => handleSelectItem(item)}
+            >
+              <Text style={styles.listItemText}>{item.title}</Text>
+              <Text style={styles.listItemSubtitle}>{item.agency}</Text>
+              <Text style={styles.listItemSubtitle}>{item.announcement_date}</Text>
+              <Text style={styles.listItemSubtitle}>{item.budget}</Text>
+            </Pressable>
+          ))
+        ) : (
+          <Text style={styles.noData}>조회된 데이터가 없습니다.</Text>
+        )}
       </ScrollView>
 
-      {/* 팝업 */}
       {selectedItem && (
         <View style={styles.popupOverlay}>
           <View style={styles.popupContainer}>
-            <Text style={styles.popupTitle}>{selectedItem.공고명}</Text>
+            <Text style={styles.popupTitle}>{selectedItem.title}</Text>
             <ScrollView>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>구분: </Text>
-                {selectedItem.구분}
+                {selectedItem.site_name}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>검색 키워드: </Text>
-                {selectedItem.검색키워드}
+                {selectedItem.keyword}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>업무: </Text>
-                {selectedItem.업무}
+                {selectedItem.task}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>분류: </Text>
-                {selectedItem.분류}
+                {selectedItem.category}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>공고일: </Text>
-                {selectedItem.공고일}
+                {selectedItem.announcement_date}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>공고기관: </Text>
-                {selectedItem.공고기관}
+                {selectedItem.agency}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>마감일시: </Text>
-                {selectedItem.마감일시}
+                {selectedItem.deadline}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>사업예산: </Text>
-                {selectedItem.사업예산}
+                {selectedItem.budget}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>계약방법: </Text>
-                {selectedItem.계약방법}
+                {selectedItem.contract_method}
               </Text>
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>공고문 URL: </Text>
-                {selectedItem.공고문URL}
-              </Text>
+                <Text
+                  style={{ color: 'blue', textDecorationLine: 'underline' }} // 링크 스타일 추가
+                  onPress={() => Linking.openURL(selectedItem.url)} // URL 클릭 시 이동
+                >
+                  {selectedItem.url}
+                </Text>
+            </Text>
             </ScrollView>
             <Pressable onPress={handleClosePopup} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>닫기</Text>
@@ -204,6 +193,12 @@ const styles = StyleSheet.create({
     top: 40,
     left: 20,
     zIndex: 10,
+  },
+  noData: {
+    textAlign: 'center',
+    fontSize: 18,
+    color: '#999',
+    marginTop: 20,
   },
 });
 
