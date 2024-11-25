@@ -12,38 +12,36 @@ const UserManagementPage = () => {
   const [newDepartmentPassword, setNewDepartmentPassword] = useState('');
 
   const [deleteDepartment, setDeleteDepartment] = useState('');
-
-  const router = useRouter(); // 네비게이션 사용
-
+  const [deleteDepartmentpassword, setDeleteDepartmentpassword] = useState('');
+  const router = useRouter(); 
   const handlePasswordChange = async () => {
     if (!departmentName || !currentPassword || !newPassword) {
       Alert.alert('Error', '모든 필드를 입력해주세요.');
       return;
     }
-
+  
     try {
-      const response = await fetch('http://192.168.0.2:5001/api/update-password', {
-        method: 'PUT',
+      // URL에 쿼리 매개변수 추가
+      const url = `http://192.168.0.4:5001/departments_update_password/?name=${encodeURIComponent(
+        departmentName
+      )}&current_password=${encodeURIComponent(currentPassword)}&new_password=${encodeURIComponent(newPassword)}`;
+  
+      const response = await fetch(url, {
+        method: 'PUT', // HTTP PUT 요청
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          departmentName,
-          oldPassword: currentPassword,
-          newPassword,
-        }),
       });
-
+  
       const data = await response.json();
-
       if (response.ok) {
-        Alert.alert('비밀번호 변경 성공!', "비밀번호가 성공적으로 변경되었습니다");
+        Alert.alert('성공', '비밀번호가 성공적으로 변경되었습니다.');
       } else {
-        Alert.alert('오류 발생', "비밀번호 변경 중 오류가 발생하였습니다.");
+        Alert.alert('실패', data.detail || '부서 이름과 비밀번호를 다시 확인해주세요.');
       }
     } catch (error) {
       console.error('Error during password change:', error);
-      Alert.alert('오류 발생', '서버에 문제가 발생했습니다.');
+      Alert.alert('Error', '서버에 문제가 발생했습니다.');
     }
   };
 
@@ -54,13 +52,13 @@ const UserManagementPage = () => {
     }
 
     try {
-      const response = await fetch('http://192.168.0.2:5001/api/register', {
+      const response = await fetch('http://192.168.0.4:5001/departments_add/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          departmentName: newDepartment,
+          name: newDepartment,
           password: newDepartmentPassword,
         }),
       });
@@ -79,31 +77,33 @@ const UserManagementPage = () => {
   };
 
   const handleDepartmentDeletion = async () => {
-    if (!deleteDepartment) {
-      Alert.alert('오류 발생', '부서 이름을 입력해주세요.');
+    if (!deleteDepartment || !deleteDepartmentpassword) {
+      Alert.alert('오류 발생', '부서 이름과 비밀번호를 입력해주세요.');
       return;
     }
-
+  
     try {
-      const response = await fetch('http://192.168.0.2:5001/api/delete', {
-        method: 'DELETE',
+      // URL에 쿼리 매개변수 추가
+      const url = `http://192.168.0.4:5001/departments_delete/?department_name=${encodeURIComponent(
+        deleteDepartment
+      )}&password=${encodeURIComponent(deleteDepartmentpassword)}`;
+  
+      const response = await fetch(url, {
+        method: 'DELETE', // HTTP DELETE 요청
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          departmentName: deleteDepartment,
-        }),
       });
-
+  
       const data = await response.json();
-
+  
       if (response.ok) {
-        Alert.alert('부서 삭제 성공!', "성공적으로 부서가 삭제되었습니다.");
+        Alert.alert('성공', `부서 '${deleteDepartment}'가 성공적으로 삭제되었습니다.`);
       } else {
-        Alert.alert('오류 발생', "부서 삭제 중 오류가 발생했습니다.");
+        Alert.alert('실패', data.detail || '부서 이름과 비밀번호를 다시 확인해주세요.');
       }
     } catch (error) {
-      console.error('Error during deletion:', error);
+      console.error('Error during department deletion:', error);
       Alert.alert('오류 발생', '서버에 문제가 발생했습니다.');
     }
   };
@@ -172,6 +172,13 @@ const UserManagementPage = () => {
         placeholderTextColor="#555"
         value={deleteDepartment}
         onChangeText={setDeleteDepartment}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="삭제할 부서 비밀번호 확인"
+        placeholderTextColor="#555"
+        value={deleteDepartmentpassword}
+        onChangeText={setDeleteDepartmentpassword}
       />
       <Pressable style={styles.button} onPress={handleDepartmentDeletion}>
         <Text style={styles.buttonText}>부서 삭제</Text>

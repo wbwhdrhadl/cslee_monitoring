@@ -13,21 +13,21 @@ const LoginPage = () => {
       Alert.alert('Error', '부서와 비밀번호를 입력하세요.');
       return;
     }
-
+  
     try {
-      const response = await fetch('http://192.168.0.2:5001/api/auth', {
-        method: 'POST',
+      // URL에 쿼리 매개변수 추가
+      const url = `http://192.168.0.4:5001/departments_auth/?department_name=${encodeURIComponent(
+        selectedDepartment
+      )}&password=${encodeURIComponent(password)}`;
+  
+      const response = await fetch(url, {
+        method: 'POST', // POST 요청, 쿼리 매개변수를 URL에 포함
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          departmentName: selectedDepartment,
-          password: password,
-        }),
       });
-
+  
       const data = await response.json();
-
       if (response.ok) {
         Alert.alert(
           'cslee 직원 여러분 안녕하세요😀',
@@ -42,6 +42,7 @@ const LoginPage = () => {
       Alert.alert('Error', '서버에 문제가 발생했습니다.');
     }
   };
+  
 
   return (
     <View style={styles.container}>
