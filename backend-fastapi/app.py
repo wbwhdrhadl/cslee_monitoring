@@ -144,13 +144,12 @@ def create_search_result(result: SearchResultCreate, db: Session = Depends(get_d
 def add_keyword(result: keyword, db: Session = Depends(get_db)):
     date_interval = (result.end_date - result.start_date).days  
     new_result_keyword = KeywordResult(
-        key_id=result.key_id,
         user_id=result.user_id,
         site_name=result.site_name,
         keyword=result.keyword,
-        start_date=result.start_date,
-        end_date=result.end_date,
-        date_interval=date_interval,  
+        # start_date=result.start_date,
+        # end_date=result.end_date,
+        # date_interval=date_interval,  
         created_at=datetime.utcnow(),
     )
     db.add(new_result_keyword)
