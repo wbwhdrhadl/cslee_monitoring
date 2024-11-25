@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
 import { useUser } from '../UserContext'; // UserContext에서 useUser 가져오기
@@ -24,33 +24,58 @@ const KeywordRegistrationPage = () => {
   const [currentKeyword, setCurrentKeyword] = useState('');
   const [selectedSite, setSelectedSite] = useState('');
 
-  // 키워드 추가 API 호출
+  // 페이지 로드 시 초기 데이터 가져오기
+  useEffect(() => {
+    const fetchKeywords = async () => {
+      try {
+        const response = await fetch(`http://192.168.0.4:5001/keywords/?user_id=${userId}`);
+        if (response.ok) {
+          const data = await response.json();
+          const groupedKeywords = data.reduce((acc, item) => {
+            if (!acc[item.site_name]) acc[item.site_name] = [];
+            acc[item.site_name].push(item.keyword);
+            return acc;
+          }, {});
+
+          setKeywordsBySite((prevState) => ({
+            ...prevState,
+            ...groupedKeywords,
+          }));
+        } else {
+          Alert.alert('오류', '키워드를 가져오는 중 문제가 발생했습니다.');
+        }
+      } catch (error) {
+        console.error('Error fetching keywords:', error);
+        Alert.alert('오류', '키워드를 가져오는 중 문제가 발생했습니다.');
+      }
+    };
+
+    fetchKeywords();
+  }, [userId]);
+
   const handleAddKeywordAPI = async (site, keyword) => {
     try {
       const response = await fetch('http://192.168.0.4:5001/keyword_add/', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json', // JSON 형식임을 명시
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: userId, // UserContext에서 받아온 user_id
+          user_id: userId,
           site_name: site,
           keyword,
         }),
       });
-  
-      if (response.ok) {
-        const data = await response.json();
-      } else {
-        const data = await response.json();
+
+      if (!response.ok) {
+        Alert.alert('오류', '키워드 추가 중 문제가 발생했습니다.');
       }
     } catch (error) {
       console.error('Error adding keyword:', error);
-      alert('키워드 추가 중 문제가 발생했습니다.');
+      Alert.alert('오류', '키워드 추가 중 문제가 발생했습니다.');
     }
   };
 
-  // 키워드 삭제 API 호출
   const handleDeleteKeywordAPI = async (site, keyword) => {
     try {
       const response = await fetch('http://192.168.0.4:5001/keyword_delete/', {
@@ -59,16 +84,14 @@ const KeywordRegistrationPage = () => {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          user_id: userId, // UserContext에서 받아온 user_id
+          user_id: userId,
           site_name: site,
           keyword,
         }),
       });
 
-      if (response.ok) {
-      } else {
-        const data = await response.json();
-        Alert.alert('오류', data.detail || '키워드 삭제 중 문제가 발생했습니다.');
+      if (!response.ok) {
+        Alert.alert('오류', '키워드 삭제 중 문제가 발생했습니다.');
       }
     } catch (error) {
       console.error('Error deleting keyword:', error);
@@ -76,26 +99,24 @@ const KeywordRegistrationPage = () => {
     }
   };
 
-  // 키워드 추가 처리
   const handleAddKeyword = (site) => {
     if (currentKeyword.trim()) {
       setKeywordsBySite((prevState) => ({
         ...prevState,
         [site]: [...prevState[site], currentKeyword.trim()],
       }));
-      handleAddKeywordAPI(site, currentKeyword.trim()); // API 호출
+      handleAddKeywordAPI(site, currentKeyword.trim());
       setCurrentKeyword('');
     }
   };
 
-  // 키워드 삭제 처리
   const handleDeleteKeyword = (site, index) => {
     const keywordToDelete = keywordsBySite[site][index];
     setKeywordsBySite((prevState) => ({
       ...prevState,
       [site]: prevState[site].filter((_, i) => i !== index),
     }));
-    handleDeleteKeywordAPI(site, keywordToDelete); // API 호출
+    handleDeleteKeywordAPI(site, keywordToDelete);
   };
 
   const simulateProgress = () => {
@@ -120,7 +141,7 @@ const KeywordRegistrationPage = () => {
     const hasKeywords = Object.values(keywordsBySite).some((keywords) => keywords.length > 0);
 
     if (!hasKeywords) {
-      alert('최소 하나의 키워드를 추가해주세요.');
+      Alert.alert('오류', '최소 하나의 키워드를 추가해주세요.');
       return;
     }
 
@@ -190,6 +211,7 @@ const KeywordRegistrationPage = () => {
     </View>
   );
 };
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,

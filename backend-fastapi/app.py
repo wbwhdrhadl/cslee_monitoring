@@ -195,3 +195,11 @@ def get_search_results(
         raise HTTPException(status_code=404, detail="일치하는 데이터를 찾을 수 없습니다.")
 
     return results
+
+@app.get("/keywords/")
+def get_keywords(user_id: str, db: Session = Depends(get_db)):
+    keywords = db.query(KeywordResult).filter(KeywordResult.user_id == user_id).all()
+    return [
+        {"site_name": keyword.site_name, "keyword": keyword.keyword}
+        for keyword in keywords
+    ]
