@@ -92,7 +92,7 @@ const MainPage = () => {
         <Text style={styles.title}>키워드 조회</Text>
 
         <View style={styles.searchInputContainer}>
-          <FontAwesome name="키워드 조회" size={20} color="#888" style={styles.searchIcon} />
+          <FontAwesome name="search" size={20} color="#888" style={styles.searchIcon} />
           <TextInput
             style={styles.input}
             placeholder="조회할 키워드를 입력해주세요"

@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, Pressable } from 'react-native';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; // Router 사용
-// import Navbar from '../components/navbar';
+
 
 const AdminPage = () => {
   const router = useRouter(); // Router 사용
