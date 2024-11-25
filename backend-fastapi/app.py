@@ -142,20 +142,17 @@ def create_search_result(result: SearchResultCreate, db: Session = Depends(get_d
 # 키워드 추가
 @app.post("/keyword_add/")
 def add_keyword(result: keyword, db: Session = Depends(get_db)):
-    date_interval = (result.end_date - result.start_date).days  
+    # 새로운 키워드 데이터베이스에 추가
     new_result_keyword = KeywordResult(
         user_id=result.user_id,
         site_name=result.site_name,
         keyword=result.keyword,
-        # start_date=result.start_date,
-        # end_date=result.end_date,
-        # date_interval=date_interval,  
         created_at=datetime.utcnow(),
     )
     db.add(new_result_keyword)
     db.commit()
     db.refresh(new_result_keyword)
-    return new_result_keyword
+    return {"message": "키워드가 성공적으로 추가되었습니다.", "data": new_result_keyword}
 
 # 키워드 삭제
 @app.delete("/keyword_delete/")

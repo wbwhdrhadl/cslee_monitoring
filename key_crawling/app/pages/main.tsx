@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, ScrollView,Alert } from 'react-native';
 import Checkbox from 'expo-checkbox';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useRouter,useLocalSearchParams } from 'expo-router'; 
+import { useUser } from '../UserContext'; 
 
 const MainPage = () => {
   const [keyword, setKeyword] = useState('');
@@ -27,6 +28,14 @@ const MainPage = () => {
   const [results, setResults] = useState([]);
   const router = useRouter(); 
   const { user_id } = useLocalSearchParams();
+  const { setUserId, userId } = useUser();
+
+  useEffect(() => {
+    if (user_id) {
+      setUserId(user_id); // 전달받은 user_id를 UserContext에 설정
+    }
+  }, [user_id, setUserId]);
+
   const handleAddKeyword = () => {
     if (keyword.trim()) {
       setKeywords((prevKeywords) => [...prevKeywords, keyword.trim()]);
@@ -48,7 +57,7 @@ const MainPage = () => {
   
     try {
       const queryParams = new URLSearchParams({
-        user_id: user_id,
+        user_id: userId || '',
         start_date: startDate.toISOString(),
         end_date: endDate.toISOString(),
       });

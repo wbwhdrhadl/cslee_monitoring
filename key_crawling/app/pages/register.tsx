@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
+import { useUser } from '../UserContext'; // UserContext에서 useUser 가져오기
 
 const KeywordRegistrationPage = () => {
+  const { userId } = useUser(); // UserContext에서 userId 가져오기
   const [keywordsBySite, setKeywordsBySite] = useState({
     나라장터: [],
     나라장터사전공고: [],
@@ -22,21 +24,81 @@ const KeywordRegistrationPage = () => {
   const [currentKeyword, setCurrentKeyword] = useState('');
   const [selectedSite, setSelectedSite] = useState('');
 
+  // 키워드 추가 API 호출
+  const handleAddKeywordAPI = async (site, keyword) => {
+    try {
+      const response = await fetch('http://192.168.0.4:5001/keyword_add/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json', // JSON 형식임을 명시
+        },
+        body: JSON.stringify({
+          user_id: userId, // UserContext에서 받아온 user_id
+          site_name: site,
+          keyword,
+        }),
+      });
+  
+      if (response.ok) {
+        const data = await response.json();
+        alert(`${site}에 키워드가 성공적으로 추가되었습니다.`);
+      } else {
+        const data = await response.json();
+        alert(data.detail || '키워드 추가 중 문제가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('Error adding keyword:', error);
+      alert('키워드 추가 중 문제가 발생했습니다.');
+    }
+  };
+
+  // 키워드 삭제 API 호출
+  const handleDeleteKeywordAPI = async (site, keyword) => {
+    try {
+      const response = await fetch('http://192.168.0.4:5001/keyword_delete/', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          user_id: userId, // UserContext에서 받아온 user_id
+          site_name: site,
+          keyword,
+        }),
+      });
+
+      if (response.ok) {
+        Alert.alert('성공', `${site}에서 키워드가 삭제되었습니다.`);
+      } else {
+        const data = await response.json();
+        Alert.alert('오류', data.detail || '키워드 삭제 중 문제가 발생했습니다.');
+      }
+    } catch (error) {
+      console.error('Error deleting keyword:', error);
+      Alert.alert('오류', '키워드 삭제 중 문제가 발생했습니다.');
+    }
+  };
+
+  // 키워드 추가 처리
   const handleAddKeyword = (site) => {
     if (currentKeyword.trim()) {
       setKeywordsBySite((prevState) => ({
         ...prevState,
         [site]: [...prevState[site], currentKeyword.trim()],
       }));
+      handleAddKeywordAPI(site, currentKeyword.trim()); // API 호출
       setCurrentKeyword('');
     }
   };
 
+  // 키워드 삭제 처리
   const handleDeleteKeyword = (site, index) => {
+    const keywordToDelete = keywordsBySite[site][index];
     setKeywordsBySite((prevState) => ({
       ...prevState,
       [site]: prevState[site].filter((_, i) => i !== index),
     }));
+    handleDeleteKeywordAPI(site, keywordToDelete); // API 호출
   };
 
   const simulateProgress = () => {
@@ -131,7 +193,6 @@ const KeywordRegistrationPage = () => {
     </View>
   );
 };
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
