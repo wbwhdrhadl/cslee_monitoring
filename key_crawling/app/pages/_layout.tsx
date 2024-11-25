@@ -2,6 +2,7 @@ import React from 'react';
 import { Tabs } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { UserProvider } from '../UserContext';
+
 export default function Layout() {
   return (
     <UserProvider>
@@ -13,7 +14,7 @@ export default function Layout() {
             tabBarIcon: ({ color, size }) => (
               <FontAwesome name="search" color={color} size={size} />
             ),
-            headerShown: false, 
+            headerShown: false,
           }}
         />
         <Tabs.Screen
@@ -23,7 +24,7 @@ export default function Layout() {
             tabBarIcon: ({ color, size }) => (
               <FontAwesome name="tags" color={color} size={size} />
             ),
-            headerShown: false, 
+            headerShown: false,
           }}
         />
         <Tabs.Screen
@@ -33,7 +34,17 @@ export default function Layout() {
             tabBarIcon: ({ color, size }) => (
               <FontAwesome name="plus" color={color} size={size} />
             ),
-            headerShown: false, 
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
+          name="result"
+          options={{
+            tabBarLabel: 'Result',
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome name="check-circle" color={color} size={size} />
+            ),
+            headerShown: false,
           }}
         />
         <Tabs.Screen
@@ -43,7 +54,7 @@ export default function Layout() {
             tabBarIcon: ({ color, size }) => (
               <FontAwesome name="cog" color={color} size={size} />
             ),
-            headerShown: false, 
+            headerShown: false,
           }}
         />
       </Tabs>

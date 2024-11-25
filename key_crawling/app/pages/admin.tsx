@@ -1,11 +1,34 @@
-import React from 'react';
-import { View, Text, StyleSheet, Pressable } from 'react-native';
-import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
-import { useRouter } from 'expo-router'; // Router 사용
-
+import React, { useCallback } from 'react';
+import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
+import { FontAwesome } from '@expo/vector-icons';
+import { useRouter } from 'expo-router';
+import { useUser } from '../UserContext';
+import { useFocusEffect } from '@react-navigation/native'; // useFocusEffect 가져오기
 
 const AdminPage = () => {
+  const { userId } = useUser(); // UserContext에서 userId 가져오기
   const router = useRouter(); // Router 사용
+
+  useFocusEffect(
+    useCallback(() => {
+      // 페이지가 화면에 포커스될 때마다 실행
+      if (userId !== '6') {
+        Alert.alert(
+          '접근 불가',
+          '관리자 로그인 후 이용해주세요.',
+          [
+            {
+              text: '확인',
+              onPress: () => router.push('./main'), // 메인 페이지로 이동
+            },
+          ],
+          { cancelable: false } // Alert를 반드시 처리하게 함
+        );
+      } else {
+        Alert.alert('환영합니다', '관리자 페이지에 접속하셨습니다.');
+      }
+    }, [userId, router]) // 의존성 배열에 userId와 router 추가
+  );
 
   const handleUserManagement = () => {
     router.push('/department'); // department 페이지로 이동
@@ -17,21 +40,19 @@ const AdminPage = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>관리자 페이지</Text>
-      <Text style={styles.subTitle}>관리자를 위한 페이지 입니다</Text>
+      {userId === '6' && ( // user_id가 6일 경우에만 페이지 렌더링
+        <>
+          <Text style={styles.title}>관리자 페이지</Text>
+          <Text style={styles.subTitle}>관리자를 위한 페이지 입니다</Text>
 
-      <View style={styles.buttonContainer}>
-        <Pressable style={styles.button} onPress={handleUserManagement}>
-          <FontAwesome name="users" size={24} color="#ffffff" />
-          <Text style={styles.buttonText}>회원 정보 관리</Text>
-        </Pressable>
-
-        <Pressable style={styles.button} onPress={handleFileManagement}>
-          <MaterialIcons name="folder" size={24} color="#ffffff" />
-          <Text style={styles.buttonText}>Q&A</Text>
-        </Pressable>
-      </View>
-      {/* <Navbar /> */}
+          <View style={styles.buttonContainer}>
+            <Pressable style={styles.button} onPress={handleUserManagement}>
+              <FontAwesome name="users" size={24} color="#ffffff" />
+              <Text style={styles.buttonText}>회원 정보 관리</Text>
+            </Pressable>
+          </View>
+        </>
+      )}
     </View>
   );
 };

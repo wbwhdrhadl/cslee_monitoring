@@ -80,7 +80,7 @@ const MainPage = () => {
   
       if (response.ok) {
         router.push({
-          pathname: '/result',
+          pathname: './result',
           params: {
             results: JSON.stringify(data), 
           },
@@ -182,7 +182,7 @@ const MainPage = () => {
         </View>
 
         <Pressable onPress={handleSearch} style={styles.searchButton}>
-          <Text style={styles.searchButtonText}>Search</Text>
+          <Text style={styles.searchButtonText}>키워드 조회</Text>
         </Pressable>
       </ScrollView>
     </View>
