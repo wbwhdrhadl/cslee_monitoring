@@ -32,7 +32,7 @@ const ResultPage = () => {
       </Pressable>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
-        <Text style={styles.title}>키워드 포함 공고</Text>
+        <Text style={styles.title}>조회 결과</Text>
         {data.length > 0 ? (
           data.map((item, index) => (
             <Pressable
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   title: {
-    fontSize: 32,
+    fontSize: 25,
     fontWeight: 'bold',
     marginBottom: 30,
     color: '#1f2937',
