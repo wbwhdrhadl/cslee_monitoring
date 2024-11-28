@@ -3,12 +3,14 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from models.database import engine, Base, get_db
 from models.result_model import SearchResult
+from models.favorite import FavoriteResult
 from models.keyword_model import KeywordResult
 from models.department_model import Department
 from models.schemas import SearchResultCreate
 from models.schemas2 import keyword
 from models.schemas3 import SearchResultBase
 from models.schemas4 import UserResult
+from models.schemas5 import FavoriteCreate
 from datetime import datetime
 from typing import List
 from fastapi import HTTPException, status
@@ -258,3 +260,103 @@ def get_keywords(user_id: str, db: Session = Depends(get_db)):
         {"site_name": keyword.site_name, "keyword": keyword.keyword}
         for keyword in keywords
     ]
+@app.post("/favorites/add/")
+def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
+    """
+    즐겨찾기 항목 추가
+    """
+    try:
+        # 중복 방지: 이미 즐겨찾기에 추가된 데이터가 있는지 확인
+        existing_favorite = db.query(FavoriteResult).filter(
+            FavoriteResult.user_id == favorite_data.user_id,
+            FavoriteResult.title == favorite_data.title
+        ).first()
+
+        if existing_favorite:
+            raise HTTPException(status_code=400, detail="이미 즐겨찾기에 추가된 항목입니다.")
+
+        # 새 즐겨찾기 데이터 생성 및 삽입
+        new_favorite = FavoriteResult(
+            id = favorite_data.id,
+            user_id=favorite_data.user_id,
+            site_name=favorite_data.site_name,
+            keyword=favorite_data.keyword,
+            category=favorite_data.category,
+            task=favorite_data.task,
+            announcement_date=favorite_data.announcement_date,
+            title=favorite_data.title,
+            agency=favorite_data.agency,
+            deadline=favorite_data.deadline,
+            budget=favorite_data.budget,
+            contract_method=favorite_data.contract_method,
+            url=favorite_data.url,
+            created_at=datetime.utcnow(),
+        )
+        db.add(new_favorite)
+        db.commit()
+        db.refresh(new_favorite)
+
+        return {"message": "즐겨찾기에 성공적으로 추가되었습니다.", "data": new_favorite}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
+
+
+# 즐겨찾기 삭제
+@app.delete("/favorites/delete/")
+def delete_favorite(user_id: str, title: str, db: Session = Depends(get_db)):
+    """
+    즐겨찾기 항목 삭제
+    """
+    try:
+        # 즐겨찾기 항목 검색 및 삭제
+        deleted_count = db.query(FavoriteResult).filter(
+            FavoriteResult.user_id == user_id,
+            FavoriteResult.title == title
+        ).delete(synchronize_session=False)
+
+        if deleted_count == 0:
+            raise HTTPException(status_code=404, detail="해당 즐겨찾기 항목을 찾을 수 없습니다.")
+
+        db.commit()
+        return {"message": "즐겨찾기에서 성공적으로 삭제되었습니다."}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
+
+
+# 즐겨찾기 조회
+@app.get("/favorites/")
+def get_favorites(user_id: str, db: Session = Depends(get_db)):
+    """
+    사용자별 즐겨찾기 조회
+    """
+    try:
+        # 사용자 ID에 해당하는 모든 즐겨찾기 조회
+        favorites = db.query(FavoriteResult).filter(FavoriteResult.user_id == user_id).all()
+
+        if not favorites:
+            raise HTTPException(status_code=404, detail="즐겨찾기 항목이 없습니다.")
+
+        # 결과 반환
+        return [
+            {
+                "id": favorite.id,
+                "site_name": favorite.site_name,
+                "keyword": favorite.keyword,
+                "category": favorite.category,
+                "task": favorite.task,
+                "announcement_date": favorite.announcement_date,
+                "title": favorite.title,
+                "agency": favorite.agency,
+                "deadline": favorite.deadline,
+                "budget": favorite.budget,
+                "contract_method": favorite.contract_method,
+                "url": favorite.url,
+                "created_at": favorite.created_at,
+            }
+            for favorite in favorites
+        ]
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")

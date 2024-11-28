@@ -1,55 +1,154 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet, Pressable, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-native';
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
-import { Linking } from 'react-native'; 
+import { Linking } from 'react-native';
+import { useUser } from '../UserContext'; // UserContext에서 userId 가져오기
+
+// ListItem 컴포넌트 분리
+const ListItem = ({ item, isFavorite, onFavoritePress, onSelectItem }) => (
+  <Pressable
+    style={styles.listItem}
+    onPress={() => {
+      console.log('Item selected:', item);
+      onSelectItem(item);
+    }}
+  >
+    <Text style={styles.listItemText}>{item.title}</Text>
+    <Text style={styles.listItemSubtitle}>{item.agency}</Text>
+    <Text style={styles.listItemSubtitle}>{item.announcement_date}</Text>
+    <Text style={styles.listItemSubtitle}>{item.budget}</Text>
+    <Pressable
+      onPress={(e) => {
+        e.stopPropagation(); // Prevent triggering parent onPress
+        console.log('Favorite button pressed for item ID:', item.id);
+        onFavoritePress(item);
+      }}
+      style={styles.favoriteButton}
+    >
+      <FontAwesome name={isFavorite ? "star" : "star-o"} size={24} color="gray" />
+    </Pressable>
+  </Pressable>
+);
 
 const ResultPage = () => {
-  const router = useRouter(); // router 정의
-  const { results } = useLocalSearchParams(); // 전달받은 params에서 데이터 추출
+  const { userId } = useUser(); // UserContext에서 userId 가져오기
+  const router = useRouter();
+  const { results } = useLocalSearchParams();
   const [data, setData] = useState([]);
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [favorites, setFavorites] = useState({}); // favorites 상태를 객체로 초기화
 
   useEffect(() => {
+    console.log('Results received:', results);
     if (results) {
-      setData(JSON.parse(results)); // JSON 문자열을 객체로 변환
+      const parsedData = JSON.parse(results);
+      const updatedData = parsedData.map((item, index) => ({
+        ...item,
+        id: item.id || index, // id가 없으면 index로 대체
+      }));
+      setData(updatedData);
+
+      const initialFavorites = updatedData.reduce((acc, item) => {
+        acc[item.id] = false;
+        return acc;
+      }, {});
+      setFavorites(initialFavorites);
     }
   }, [results]);
 
-  const [selectedItem, setSelectedItem] = useState(null);
-
   const handleSelectItem = (item) => {
+    console.log('Item selected:', item);
     setSelectedItem(item);
   };
 
   const handleClosePopup = () => {
+    console.log('Popup closed');
     setSelectedItem(null);
+  };
+
+  const handleFavorite = async (item) => {
+    console.log('Toggling favorite for item:', item);
+    const isCurrentlyFavorite = favorites[item.id];
+
+    // API 요청을 통해 즐겨찾기 상태 업데이트
+    try {
+      if (isCurrentlyFavorite) {
+        await removeFavorite(item.id, userId);
+      } else {
+        await addFavorite({ ...item, user_id: userId });
+      }
+      // 로컬 상태 업데이트
+      setFavorites((prevFavorites) => ({
+        ...prevFavorites,
+        [item.id]: !isCurrentlyFavorite,
+      }));
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      Alert.alert('Error', '즐겨찾기 상태를 업데이트할 수 없습니다.');
+    }
+  };
+
+  const addFavorite = async (item) => {
+    try {
+      const response = await fetch('http://192.168.0.4:5001/favorites/add/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to add favorite');
+      }
+      console.log('Favorite added successfully:', item);
+    } catch (error) {
+      console.error('Error adding favorite:', error);
+      throw error;
+    }
+  };
+
+  const removeFavorite = async (id, userId) => {
+    try {
+      const response = await fetch(
+        http://192.168.0.4:5001/favorites/delete/?id=${id}&user_id=${userId},
+        {
+          method: 'DELETE',
+        }
+      );
+      if (!response.ok) {
+        throw new Error('Failed to remove favorite');
+      }
+      console.log('Favorite removed successfully:', id);
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+      throw error;
+    }
   };
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.topCloseButton} onPress={() => router.back()}>
+      <Pressable style={styles.topCloseButton} onPress={() => {
+        console.log('Navigating back');
+        router.back();
+      }}>
         <FontAwesome name="close" size={24} color="#333" />
       </Pressable>
-
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>조회 결과</Text>
         {data.length > 0 ? (
           data.map((item, index) => (
-            <Pressable
-              key={index}
-              style={styles.listItem}
-              onPress={() => handleSelectItem(item)}
-            >
-              <Text style={styles.listItemText}>{item.title}</Text>
-              <Text style={styles.listItemSubtitle}>{item.agency}</Text>
-              <Text style={styles.listItemSubtitle}>{item.announcement_date}</Text>
-              <Text style={styles.listItemSubtitle}>{item.budget}</Text>
-            </Pressable>
+            <ListItem
+              key={item.id ? item-${item.id} : index-${index}}
+              item={item}
+              isFavorite={favorites[item.id]}
+              onFavoritePress={handleFavorite}
+              onSelectItem={handleSelectItem}
+            />
           ))
         ) : (
           <Text style={styles.noData}>조회된 데이터가 없습니다.</Text>
         )}
       </ScrollView>
+
 
       {selectedItem && (
         <View style={styles.popupOverlay}>
@@ -95,12 +194,15 @@ const ResultPage = () => {
               <Text style={styles.popupText}>
                 <Text style={styles.popupLabel}>공고문 URL: </Text>
                 <Text
-                  style={{ color: 'blue', textDecorationLine: 'underline' }} // 링크 스타일 추가
-                  onPress={() => Linking.openURL(selectedItem.url)} // URL 클릭 시 이동
+                  style={{ color: 'blue', textDecorationLine: 'underline' }}
+                  onPress={() => {
+                    console.log('Opening URL:', selectedItem.url); // Log the URL being opened
+                    Linking.openURL(selectedItem.url);
+                  }}
                 >
                   {selectedItem.url}
                 </Text>
-            </Text>
+              </Text>
             </ScrollView>
             <Pressable onPress={handleClosePopup} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>닫기</Text>
@@ -118,7 +220,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#f5f5f5',
   },
   scrollContent: {
-    padding: 10,
+    padding: 20,
   },
   title: {
     fontSize: 25,
@@ -135,6 +237,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#d1d5db',
     elevation: 2,
+    position: 'relative', // Ensure relative positioning for absolute child elements
   },
   listItemText: {
     fontSize: 18,
@@ -145,6 +248,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4b5563',
     marginTop: 5,
+  },
+  favoriteButton: {
+    position: 'absolute',
+    right: 15,
+    bottom: 15, // Place at the bottom-right corner of the listItem
   },
   popupOverlay: {
     position: 'absolute',
