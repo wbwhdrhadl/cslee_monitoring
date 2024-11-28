@@ -14,13 +14,15 @@ from typing import List
 from fastapi import HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import pandas as pd
+import os
 
 app = FastAPI()
 
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 필요한 경우 ["http://192.168.0.4:8000"]와 같이 특정 도메인으로 제한 가능
+    allow_origins=["*"], 
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -115,34 +117,87 @@ def get_user_id(department_name: str, db: Session = Depends(get_db)):
 ################################################
 
 
-# 결과 DB 삽입
-@app.post("/results_add/")
-def create_search_result(result: SearchResultCreate, db: Session = Depends(get_db)):
-    new_result = SearchResult(
-        user_id=result.user_id,
-        site_name=result.site_name,
-        keyword=result.keyword,
-        category=result.category,
-        task=result.task,
-        type=result.type,
-        announcement_date=result.announcement_date,
-        title=result.title,
-        agency=result.agency,
-        deadline=result.deadline,
-        budget=result.budget,
-        contract_method=result.contract_method,
-        url=result.url,
-        saved_at=datetime.utcnow(),
-    )
-    db.add(new_result)
-    db.commit()
-    db.refresh(new_result)
-    return new_result
+@app.post("/results_add_from_excel/")
+def add_results_from_excel(db: Session = Depends(get_db)):
+    try:
+        # Excel 파일 읽기
+        file_path = "./나라장터.xlsx"
+        df = pd.read_excel(file_path)
 
+        added_count = 0  
+
+        for _, row in df.iterrows():
+            user_id = "1" 
+            site_name = row["구분"] if pd.notna(row["구분"]) else "알 수 없음"
+            keyword = row["검색 키워드"] if pd.notna(row["검색 키워드"]) else "알 수 없음"
+            category = row["비고"] if pd.notna(row["비고"]) else "알 수 없음"
+            task = row["업무"] if pd.notna(row["업무"]) else "알 수 없음"
+            type_ = row["분류"] if pd.notna(row["분류"]) else "알 수 없음"
+
+            # 날짜 데이터 처리
+            try:
+                announcement_date = (
+                    datetime.strptime(row["공고일"], "%Y-%m-%d").date()
+                    if pd.notna(row["공고일"]) and row["공고일"] != "-"
+                    else datetime.utcnow().date()  
+                )
+            except (ValueError, TypeError):
+                announcement_date = datetime.utcnow().date() 
+
+            try:
+                deadline = (
+                    datetime.strptime(row["마감일시"], "%Y-%m-%d %H:%M")
+                    if pd.notna(row["마감일시"]) and row["마감일시"] not in ["-", "0000-00-00"]
+                    else datetime.utcnow()  
+                )
+            except (ValueError, TypeError):
+                deadline = datetime.utcnow() 
+
+            title = row["공고명"] if pd.notna(row["공고명"]) else "제목 없음"
+            agency = row["공고기관"] if pd.notna(row["공고기관"]) else "알 수 없음"
+
+            budget = row["사업예산"].replace(",", "").replace("원", "").strip() if pd.notna(row["사업예산"]) else "0"
+
+            contract_method = row["계약방법"] if pd.notna(row["계약방법"]) else "알 수 없음"
+            url = row["공고문 url"] if pd.notna(row["공고문 url"]) else ""
+
+            existing_result = db.query(SearchResult).filter(SearchResult.title == title).first()
+            if existing_result:
+                continue
+
+            # 새 데이터 생성 및 삽입
+            new_result = SearchResult(
+                user_id=user_id,
+                site_name=site_name,
+                keyword=keyword,
+                category=category,
+                task=task,
+                type=type_,
+                announcement_date=announcement_date,
+                title=title,
+                agency=agency,
+                deadline=deadline,
+                budget=budget,
+                contract_method=contract_method,
+                url=url,
+                saved_at=datetime.utcnow(),
+            )
+            db.add(new_result)
+            added_count += 1
+
+        db.commit()
+
+        os.remove(file_path)
+
+        return {"message": f"{added_count}개의 고유한 결과가 성공적으로 추가되었으며, 파일이 삭제되었습니다."}
+
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Excel 파일을 찾을 수 없습니다.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"에러가 발생했습니다: {str(e)}")
 # 키워드 추가
 @app.post("/keyword_add/")
 def add_keyword(result: keyword, db: Session = Depends(get_db)):
-    # 새로운 키워드 데이터베이스에 추가
     new_result_keyword = KeywordResult(
         user_id=result.user_id,
         site_name=result.site_name,
