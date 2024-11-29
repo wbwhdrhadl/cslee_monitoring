@@ -4,7 +4,7 @@ import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '../UserContext';
 import { useFocusEffect } from '@react-navigation/native';
-
+import { Linking } from 'react-native';
 type FavoriteItem = {
   id: number;
   site_name: string;
@@ -46,7 +46,25 @@ const FavoritesPage: React.FC = () => {
     }
   };
 
-  // 항목 삭제
+  // 삭제 확인 및 항목 삭제
+  const confirmDelete = (item: FavoriteItem) => {
+    Alert.alert(
+      '삭제 확인',
+      `'${item.title}' 항목을 정말 삭제하시겠습니까?`,
+      [
+        {
+          text: '취소',
+          style: 'cancel',
+        },
+        {
+          text: '삭제',
+          style: 'destructive',
+          onPress: () => deleteFavorite(item),
+        },
+      ]
+    );
+  };
+
   const deleteFavorite = async (item: FavoriteItem) => {
     try {
       const response = await fetch(
@@ -61,8 +79,7 @@ const FavoritesPage: React.FC = () => {
       }
 
       Alert.alert('Success', '항목이 삭제되었습니다.');
-      // 삭제 후 목록 새로고침
-      fetchFavorites();
+      fetchFavorites(); // 삭제 후 목록 새로고침
     } catch (error) {
       console.error('Error deleting favorite:', error);
       Alert.alert('Error', '항목을 삭제할 수 없습니다.');
@@ -111,7 +128,7 @@ const FavoritesPage: React.FC = () => {
                     <Text style={styles.detailButtonText}>자세히 보기</Text>
                   </Pressable>
                   <Pressable
-                    onPress={() => deleteFavorite(item)}
+                    onPress={() => confirmDelete(item)}
                     style={styles.deleteButton}
                   >
                     <Text style={styles.deleteButtonText}>삭제하기</Text>
