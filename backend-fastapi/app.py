@@ -268,15 +268,16 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
     즐겨찾기 항목 추가
     """
     try:
-      
+        # 이미 존재하는 즐겨찾기 확인
         existing_favorite = db.query(FavoriteResult).filter(
             FavoriteResult.user_id == favorite_data.user_id,
             FavoriteResult.title == favorite_data.title
         ).first()
 
         if existing_favorite:
-            raise HTTPException(status_code=400, detail="이미 즐겨찾기에 추가된 항목입니다.")
+            return {"message": "이미 즐겨찾기에 추가된 항목입니다.", "data": existing_favorite}
 
+        # 새 즐겨찾기 데이터 생성
         new_favorite = FavoriteResult(
             user_id=favorite_data.user_id,
             site_name=favorite_data.site_name,
@@ -300,7 +301,6 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
-
 # 즐겨찾기 삭제
 @app.delete("/favorites/delete/")
 def delete_favorite(user_id: str, title: str, db: Session = Depends(get_db)):

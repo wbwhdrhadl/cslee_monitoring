@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, ScrollView, Pressable, Alert, Modal } from 'rea
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { useUser } from '../UserContext';
+import { Linking } from 'react-native';
 import { useFocusEffect } from '@react-navigation/native';
 
 type FavoriteItem = {
@@ -22,7 +23,7 @@ type FavoriteItem = {
 };
 
 const FavoritesPage: React.FC = () => {
-  const { userId } = useUser(); // UserContext에서 userId 가져오기
+  const { userId } = useUser();
   const router = useRouter();
   const [favorites, setFavorites] = useState<FavoriteItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -43,6 +44,29 @@ const FavoritesPage: React.FC = () => {
       console.error('Error fetching favorites:', error);
       Alert.alert('Error', '즐겨찾기 데이터를 불러올 수 없습니다.');
       setLoading(false);
+    }
+  };
+
+  // 항목 삭제
+  const deleteFavorite = async (item: FavoriteItem) => {
+    try {
+      const response = await fetch(
+        `http://192.168.0.4:5001/favorites/delete/?user_id=${userId}&title=${encodeURIComponent(
+          item.title
+        )}`,
+        { method: 'DELETE' }
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to delete favorite');
+      }
+
+      Alert.alert('Success', '항목이 삭제되었습니다.');
+      // 삭제 후 목록 새로고침
+      fetchFavorites();
+    } catch (error) {
+      console.error('Error deleting favorite:', error);
+      Alert.alert('Error', '항목을 삭제할 수 없습니다.');
     }
   };
 
@@ -78,14 +102,24 @@ const FavoritesPage: React.FC = () => {
             <View key={item.id} style={styles.listItem}>
               <View>
                 <Text style={styles.listItemText}>{item.title}</Text>
-                <Text style={styles.listItemSubtitle}>기관: {item.agency}</Text>
+                <Text style={styles.listItemSubtitle}>키워드: {item.keyword}</Text>
+                <Text style={styles.listItemSubtitle}>사이트명: {item.site_name}</Text>
+                <Text style={styles.listItemSubtitle}>공고기관: {item.agency}</Text>
                 <Text style={styles.listItemSubtitle}>예산: {item.budget}</Text>
-                <Pressable
-                  onPress={() => setSelectedItem(item)}
-                  style={styles.detailButton}
-                >
-                  <Text style={styles.detailButtonText}>자세히 보기</Text>
-                </Pressable>
+                <View style={styles.actionButtons}>
+                  <Pressable
+                    onPress={() => setSelectedItem(item)}
+                    style={styles.detailButton}
+                  >
+                    <Text style={styles.detailButtonText}>자세히 보기</Text>
+                  </Pressable>
+                  <Pressable
+                    onPress={() => deleteFavorite(item)}
+                    style={styles.deleteButton}
+                  >
+                    <Text style={styles.deleteButtonText}>삭제하기</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
           ))
@@ -101,13 +135,31 @@ const FavoritesPage: React.FC = () => {
               <Text style={styles.modalTitle}>{selectedItem.title}</Text>
               <ScrollView>
                 <Text style={styles.modalText}>
-                  <Text style={styles.modalLabel}>기관:</Text> {selectedItem.agency}
+                  <Text style={styles.modalLabel}>사이트명:</Text> {selectedItem.site_name}
+                </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>키워드:</Text> {selectedItem.keyword}
+                </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>업무:</Text> {selectedItem.task}
+                </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>분류:</Text> {selectedItem.category}
+                </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>공고일:</Text> {selectedItem.announcement_date}
+                </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>공고기관:</Text> {selectedItem.agency}
+                </Text>
+                <Text style={styles.modalText}>
+                  <Text style={styles.modalLabel}>마감일시:</Text> {selectedItem.deadline}
                 </Text>
                 <Text style={styles.modalText}>
                   <Text style={styles.modalLabel}>예산:</Text> {selectedItem.budget}
                 </Text>
                 <Text style={styles.modalText}>
-                  <Text style={styles.modalLabel}>마감일:</Text> {selectedItem.deadline}
+                  <Text style={styles.modalLabel}>계약방법:</Text> {selectedItem.contract_method}
                 </Text>
                 <Text style={styles.modalText}>
                   <Text style={styles.modalLabel}>공고문 링크:</Text>{' '}
@@ -165,14 +217,30 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#4b5563',
   },
-  detailButton: {
+  actionButtons: {
+    flexDirection: 'row',
     marginTop: 10,
+  },
+  detailButton: {
     backgroundColor: '#2563eb',
     padding: 10,
     borderRadius: 5,
+    marginRight: 10,
+    flex: 1,
     alignItems: 'center',
   },
   detailButtonText: {
+    color: '#fff',
+    fontSize: 14,
+  },
+  deleteButton: {
+    backgroundColor: '#ff5c5c',
+    padding: 10,
+    borderRadius: 5,
+    flex: 1,
+    alignItems: 'center',
+  },
+  deleteButtonText: {
     color: '#fff',
     fontSize: 14,
   },
@@ -233,3 +301,6 @@ const styles = StyleSheet.create({
 });
 
 export default FavoritesPage;
+
+
+
