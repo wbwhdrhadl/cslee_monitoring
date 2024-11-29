@@ -261,13 +261,14 @@ def get_keywords(user_id: str, db: Session = Depends(get_db)):
         for keyword in keywords
     ]
 
+# 즐겨찾기 추가
 @app.post("/favorites/add/")
 def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
     """
     즐겨찾기 항목 추가
     """
     try:
-        # 중복 방지: 이미 즐겨찾기에 추가된 데이터가 있는지 확인
+      
         existing_favorite = db.query(FavoriteResult).filter(
             FavoriteResult.user_id == favorite_data.user_id,
             FavoriteResult.title == favorite_data.title
@@ -276,7 +277,6 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
         if existing_favorite:
             raise HTTPException(status_code=400, detail="이미 즐겨찾기에 추가된 항목입니다.")
 
-        # 새 즐겨찾기 데이터 생성 및 삽입
         new_favorite = FavoriteResult(
             user_id=favorite_data.user_id,
             site_name=favorite_data.site_name,
@@ -301,19 +301,18 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
 
-
+# 즐겨찾기 삭제
 @app.delete("/favorites/delete/")
 def delete_favorite(user_id: str, title: str, db: Session = Depends(get_db)):
     """
     즐겨찾기 항목 삭제
     """
     try:
-        print(f"Received user_id: {user_id}, title: {title}")  # 로그 추가
+        print(f"Received user_id: {user_id}, title: {title}")  
 
-        # 즐겨찾기 항목 검색 및 삭제
         deleted_count = db.query(FavoriteResult).filter(
             FavoriteResult.user_id == user_id,
-            FavoriteResult.title == title.strip()  # 필요 시 공백 제거
+            FavoriteResult.title == title.strip()  
         ).delete(synchronize_session=False)
 
         if deleted_count == 0:
@@ -332,13 +331,12 @@ def get_favorites(user_id: str, db: Session = Depends(get_db)):
     사용자별 즐겨찾기 조회
     """
     try:
-        # 사용자 ID에 해당하는 모든 즐겨찾기 조회
+
         favorites = db.query(FavoriteResult).filter(FavoriteResult.user_id == user_id).all()
 
         if not favorites:
             raise HTTPException(status_code=404, detail="즐겨찾기 항목이 없습니다.")
 
-        # 결과 반환
         return [
             {
                 "id": favorite.id,

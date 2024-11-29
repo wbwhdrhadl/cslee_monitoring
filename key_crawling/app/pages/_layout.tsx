@@ -48,6 +48,16 @@ export default function Layout() {
           }}
         />
         <Tabs.Screen
+          name="favorites"
+          options={{
+            tabBarLabel: 'Favorite',
+            tabBarIcon: ({ color, size }) => (
+              <FontAwesome name="star" color={color} size={size} />
+            ),
+            headerShown: false,
+          }}
+        />
+        <Tabs.Screen
           name="admin"
           options={{
             tabBarLabel: 'Admin',

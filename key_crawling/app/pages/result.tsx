@@ -3,8 +3,7 @@ import { View, Text, StyleSheet, Pressable, ScrollView, Alert } from 'react-nati
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { Linking } from 'react-native';
-import { useUser } from '../UserContext'; // UserContext에서 userId 가져오기
-
+import { useUser } from '../UserContext'; 
 // ListItem 컴포넌트
 const ListItem = ({ item, isFavorite, onFavoritePress, onSelectItem }) => (
   <Pressable
@@ -20,7 +19,7 @@ const ListItem = ({ item, isFavorite, onFavoritePress, onSelectItem }) => (
     <Text style={styles.listItemSubtitle}>{item.budget}</Text>
     <Pressable
       onPress={(e) => {
-        e.stopPropagation(); // Prevent triggering parent onPress
+        e.stopPropagation(); 
         console.log('Favorite button pressed for item ID:', item.id);
         onFavoritePress(item);
       }}
@@ -32,12 +31,12 @@ const ListItem = ({ item, isFavorite, onFavoritePress, onSelectItem }) => (
 );
 
 const ResultPage = () => {
-  const { userId } = useUser(); // UserContext에서 userId 가져오기
+  const { userId } = useUser(); 
   const router = useRouter();
   const { results } = useLocalSearchParams();
   const [data, setData] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [favorites, setFavorites] = useState({}); // 즐겨찾기 상태를 객체로 초기화
+  const [favorites, setFavorites] = useState({}); 
 
   useEffect(() => {
     if (results) {
@@ -45,7 +44,7 @@ const ResultPage = () => {
         const parsedData = JSON.parse(results);
         const updatedData = parsedData.map((item, index) => ({
           ...item,
-          id: item.id || index, // id가 없으면 index로 대체
+          id: item.id || index, 
         }));
         setData(updatedData);
 
@@ -63,6 +62,9 @@ const ResultPage = () => {
   const handleSelectItem = (item) => {
     setSelectedItem(item);
   };
+  // const navigateToFavorites = () => {
+  //   router.push(`/favorites?user_id=${userId}`);
+  // };
 
   const handleClosePopup = () => {
     setSelectedItem(null);
@@ -148,7 +150,7 @@ const ResultPage = () => {
         {data.length > 0 ? (
           data.map((item) => (
             <ListItem
-              key={item.id} // key 속성 수정
+              key={item.id} 
               item={item}
               isFavorite={favorites[item.id]}
               onFavoritePress={handleFavorite}
@@ -187,12 +189,14 @@ const ResultPage = () => {
           </View>
         </View>
       )}
+      {/* <Pressable style={styles.smallDrawerButton} onPress={navigateToFavorites}>
+        <FontAwesome name="bars" size={24} color="#fff" />
+      </Pressable> */}
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  // 스타일 정의 (원래와 동일)
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -286,6 +290,18 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 20,
   },
+  // smallDrawerButton: {
+  //   position: 'absolute',
+  //   bottom: 20, 
+  //   right: 20, 
+  //   width: 50, 
+  //   height: 50, 
+  //   backgroundColor: '#2563eb', 
+  //   borderRadius: 25, 
+  //   alignItems: 'center', 
+  //   justifyContent: 'center', 
+  //   elevation: 5, 
+  // },
 });
 
 export default ResultPage;
