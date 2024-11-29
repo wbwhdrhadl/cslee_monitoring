@@ -10,7 +10,6 @@ const ListItem = ({ item, isFavorite, onFavoritePress, onSelectItem }) => (
   <Pressable
     style={styles.listItem}
     onPress={() => {
-      console.log('Item selected:', item);
       onSelectItem(item);
     }}
   >
@@ -21,7 +20,6 @@ const ListItem = ({ item, isFavorite, onFavoritePress, onSelectItem }) => (
     <Pressable
       onPress={(e) => {
         e.stopPropagation();
-        console.log('Favorite button pressed for item ID:', item.id);
         onFavoritePress(item);
       }}
       style={styles.favoriteButton}
@@ -72,7 +70,6 @@ const ResultPage = () => {
     const isCurrentlyFavorite = favorites[item.id];
 
     try {
-      console.log('Toggling favorite for item:', item.title);
 
       if (isCurrentlyFavorite) {
         await removeFavorite(item, userId);
@@ -92,7 +89,6 @@ const ResultPage = () => {
 
   const addFavorite = async (item) => {
     try {
-      console.log('Adding favorite for:', item.title);
       const response = await fetch('http://192.168.0.4:5001/favorites/add/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -105,7 +101,6 @@ const ResultPage = () => {
         throw new Error('Failed to add favorite');
       }
 
-      console.log('Favorite added successfully:', item.title);
     } catch (error) {
       console.error('Error in addFavorite:', error);
       throw error;
@@ -118,7 +113,6 @@ const ResultPage = () => {
         throw new Error('Item title is missing');
       }
 
-      console.log('Removing favorite for:', item.title);
       const response = await fetch(
         `http://192.168.0.4:5001/favorites/delete/?user_id=${userId}&title=${encodeURIComponent(
           item.title
@@ -132,7 +126,6 @@ const ResultPage = () => {
         throw new Error('Failed to remove favorite');
       }
 
-      console.log('Favorite removed successfully:', item.title);
     } catch (error) {
       console.error('Error in removeFavorite:', error);
       throw error;
