@@ -3,7 +3,7 @@ import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import { FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useUser } from '../UserContext';
-import { useFocusEffect } from '@react-navigation/native'; // useFocusEffect 가져오기
+import { useFocusEffect } from '@react-navigation/native';
 
 const AdminPage = () => {
   const { userId } = useUser(); // UserContext에서 userId 가져오기
@@ -38,6 +38,29 @@ const AdminPage = () => {
     alert('Navigating to File Management...');
   };
 
+  const handleResetDatabase = async () => {
+    try {
+      // API 호출
+      const response = await fetch('http://192.168.0.4:5001/admin/reset-database', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        Alert.alert('성공', '결과 데이터베이스가 초기화되었습니다.');
+      } else {
+        const errorText = await response.text();
+        console.error('Error resetting database:', errorText);
+        Alert.alert('실패', '데이터베이스 초기화에 실패했습니다.');
+      }
+    } catch (error) {
+      console.error('Error in handleResetDatabase:', error);
+      Alert.alert('에러', '서버와 연결할 수 없습니다.');
+    }
+  };
+
   return (
     <View style={styles.container}>
       {userId === '6' && ( // user_id가 6일 경우에만 페이지 렌더링
@@ -49,6 +72,11 @@ const AdminPage = () => {
             <Pressable style={styles.button} onPress={handleUserManagement}>
               <FontAwesome name="users" size={24} color="#ffffff" />
               <Text style={styles.buttonText}>회원 정보 관리</Text>
+            </Pressable>
+
+            <Pressable style={styles.button} onPress={handleResetDatabase}>
+              <FontAwesome name="database" size={24} color="#ffffff" />
+              <Text style={styles.buttonText}>결과 데이터베이스 초기화</Text>
             </Pressable>
           </View>
         </>

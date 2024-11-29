@@ -118,12 +118,11 @@ def get_user_id(department_name: str, db: Session = Depends(get_db)):
     return {"user_id": department.user_id}
 ################################################
 
-
 @app.post("/results_add_from_excel/")
 def add_results_from_excel(db: Session = Depends(get_db)):
     try:
         # Excel 파일 읽기
-        file_path = "./나라장터.xlsx"
+        file_path = "20241107_나라장터.xlsx"
         df = pd.read_excel(file_path)
 
         added_count = 0  
@@ -240,7 +239,6 @@ def get_search_results(
 ):
     # SQLAlchemy 쿼리로 조건에 맞는 데이터 조회
     results = db.query(SearchResult).filter(
-        SearchResult.user_id == user_id,  
         SearchResult.keyword.in_(keywords),  
         SearchResult.site_name.in_(site_names),  
         SearchResult.announcement_date.between(start_date, end_date) 
@@ -358,3 +356,19 @@ def get_favorites(user_id: str, db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
+    
+
+@app.post("/admin/reset-database")
+def reset_database(db: Session = Depends(get_db)):
+    """
+    현재 시간보다 이전의 deadline을 가진 데이터를 삭제하는 API.
+    """
+    try:
+        current_time = datetime.utcnow()  
+        deleted_count = db.query(SearchResult).filter(SearchResult.deadline < current_time).delete()
+        db.commit()
+
+        return {"message": "데이터베이스가 초기화되었습니다.", "deleted_count": deleted_count}
+    except Exception as e:
+        db.rollback()  
+        raise HTTPException(status_code=500, detail=f"데이터베이스 초기화 중 오류가 발생했습니다: {str(e)}")
