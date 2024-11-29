@@ -5,9 +5,7 @@
    - 📁 models : 모델 정의, 데이터 연결 폴더 모음
    - 📄 `__init__.py`
    - 📄 `app.py` : API 연결 파일
-
----
-
+   
 - 📁 `key_crawling` : [FRONT-END] 
   - 📁 `assets`
   - 📁 `pages`
