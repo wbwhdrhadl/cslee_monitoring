@@ -14,7 +14,7 @@ class SearchResultBase(BaseModel):
     title: str
     agency: str
     deadline: datetime
-    budget: float  # float 타입으로 정의
+    budget: float  
     contract_method: str
     url: str
 

@@ -5,7 +5,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Linking } from 'react-native';
 import { useUser } from '../UserContext';
 
-// ListItem 컴포넌트
+// 조회된 결과 제공 페이지
 const ListItem = ({ item, isFavorite, onFavoritePress, onSelectItem }) => (
   <Pressable
     style={styles.listItem}
@@ -306,6 +306,7 @@ const styles = StyleSheet.create({
     color: '#999',
     marginTop: 20,
   },
+  // 프론트 수정전
   // smallDrawerButton: {
   //   position: 'absolute',
   //   bottom: 20, 

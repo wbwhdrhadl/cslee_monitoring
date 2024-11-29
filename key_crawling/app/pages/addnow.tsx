@@ -5,6 +5,7 @@ import DateTimePicker from '@react-native-community/datetimepicker';
 import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useRouter } from 'expo-router'; 
 
+// 직접 실행 페이지
 const MainPage = () => {
   const [keyword, setKeyword] = useState('');
   const [keywords, setKeywords] = useState([]); 
@@ -40,16 +41,16 @@ const MainPage = () => {
   };
 
   const handleSearch = () => {
-    setIsLoading(true); // 로딩 상태 활성화
+    setIsLoading(true); 
     setTimeout(() => {
-      setIsLoading(false); // 로딩 상태 비활성화
-      setShowResultButton(true); // 결과 버튼 표시
+      setIsLoading(false); 
+      setShowResultButton(true); 
       Alert.alert('키워드 검색 완료', '키워드가 검색되었습니다.');
-    }, 3000); // 2초 후에 로딩 완료 처리
+    }, 3000); 
   };
 
   const navigateToRegister = () => {
-    router.push('../result'); // /register 페이지로 이동
+    router.push('../result'); 
   };
 
   return (

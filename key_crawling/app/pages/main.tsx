@@ -6,6 +6,7 @@ import { MaterialIcons, FontAwesome } from '@expo/vector-icons';
 import { useRouter,useLocalSearchParams } from 'expo-router'; 
 import { useUser } from '../UserContext'; 
 
+// 결과 조회 페이지
 const MainPage = () => {
   const [keyword, setKeyword] = useState('');
   const [keywords, setKeywords] = useState([]); 
@@ -32,7 +33,7 @@ const MainPage = () => {
 
   useEffect(() => {
     if (user_id) {
-      setUserId(user_id); // 전달받은 user_id를 UserContext에 설정
+      setUserId(user_id); 
     }
   }, [user_id, setUserId]);
 
@@ -70,8 +71,8 @@ const MainPage = () => {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            keywords, // request body
-            site_names: selectedSites, // request body
+            keywords, 
+            site_names: selectedSites,
           }),
         }
       );

@@ -3,6 +3,7 @@ import { View, Text, TextInput, Alert, StyleSheet, Pressable } from 'react-nativ
 import { useRouter } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 
+// 관리자 페이지로 접속 가능- 부서 관리 페이지
 const UserManagementPage = () => {
   const [departmentName, setDepartmentName] = useState('');
   const [currentPassword, setCurrentPassword] = useState('');

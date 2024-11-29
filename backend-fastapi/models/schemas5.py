@@ -17,4 +17,4 @@ class FavoriteCreate(BaseModel):
     url: str
 
     class Config:
-        orm_mode = True  # SQLAlchemy ORM과 호환 가능하도록 설정
+        orm_mode = True 

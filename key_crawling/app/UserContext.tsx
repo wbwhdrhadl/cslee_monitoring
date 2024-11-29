@@ -1,15 +1,13 @@
 import React, { createContext, useContext, useState } from 'react';
 
-// UserContext 타입 설정
+// userId 전역변수 사용
 type UserContextType = {
   userId: string | null;
   setUserId: React.Dispatch<React.SetStateAction<string | null>>;
 } | null;
 
-// UserContext 생성
 const UserContext = createContext<UserContextType>(null);
 
-// Provider 컴포넌트
 export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   const [userId, setUserId] = useState<string | null>(null);
 
@@ -20,7 +18,6 @@ export const UserProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-// Custom Hook
 export const useUser = () => {
   const context = useContext(UserContext);
   if (!context) {
@@ -29,5 +26,4 @@ export const useUser = () => {
   return context;
 };
 
-// 기본 내보내기 추가
 export default UserContext;

@@ -8,8 +8,8 @@ from sqlalchemy import Column, Integer, String, Float, DateTime
 
 class FavoriteResult(Base):
     __tablename__ = "favorite_results"
-    id = Column(Integer, primary_key=True, index=True, autoincrement=True)  # 자동 증가
-    user_id = Column(String(50), nullable=False)  # 사용자 ID
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)  
+    user_id = Column(String(50), nullable=False)  
     site_name = Column(String, nullable=True)
     keyword = Column(String, nullable=True)
     category = Column(String, nullable=True)
@@ -21,6 +21,6 @@ class FavoriteResult(Base):
     budget = Column(Integer, nullable=True)
     contract_method = Column(String, nullable=True)
     url = Column(String, nullable=True)
-    created_at = Column(DateTime, default=datetime.utcnow)  # 즐겨찾기 추가 시간
+    created_at = Column(DateTime, default=datetime.utcnow)  
 
 

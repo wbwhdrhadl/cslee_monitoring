@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import and_
 from models.database import engine, Base, get_db
 from models.result_model import SearchResult
-from models.favorite import FavoriteResult
+from models.favorite_model import FavoriteResult
 from models.keyword_model import KeywordResult
 from models.department_model import Department
 from models.schemas import SearchResultCreate
@@ -33,7 +33,7 @@ app.add_middleware(
 Base.metadata.create_all(bind=engine)
 
 
-################### 회원 정보 ###################
+################### 부서 관리[시작] ###################
 # 부서 인증
 @app.post("/departments_auth/")
 def authenticate_user(department_name: str, password: str, db: Session = Depends(get_db)):
@@ -57,7 +57,6 @@ def create_department(name: str, password: str, db: Session = Depends(get_db)):
         db.refresh(new_department)
         return {"message": f"부서 '{new_department.name}'가 성공적으로 생성되었습니다."}
     except Exception as e:
-        # JSON 형식의 HTTP 응답 반환
         return JSONResponse(
             status_code=400,
             content={"detail": f"에러 발생: {str(e)}"}
@@ -66,7 +65,6 @@ def create_department(name: str, password: str, db: Session = Depends(get_db)):
 # 부서 삭제
 @app.delete("/departments_delete/")
 def delete_department(department_name: str, password: str, db: Session = Depends(get_db)):
-    # 부서 이름과 비밀번호를 기준으로 부서 검색
     department_to_delete = db.query(Department).filter(
         Department.name == department_name,
         Department.password == password
@@ -75,7 +73,6 @@ def delete_department(department_name: str, password: str, db: Session = Depends
     if not department_to_delete:
         raise HTTPException(status_code=404, detail="부서 이름 또는 비밀번호가 올바르지 않습니다.")
 
-    # 부서 삭제
     db.delete(department_to_delete)
     db.commit()
 
@@ -89,17 +86,14 @@ def update_department_password(
     new_password: str, 
     db: Session = Depends(get_db)
 ):
-    # 부서 검색
     department_to_update = db.query(Department).filter(Department.name == name).first()
 
     if not department_to_update:
         raise HTTPException(status_code=404, detail="해당 부서를 찾을 수 없습니다.")
     
-    # 현재 비밀번호 확인
     if department_to_update.password != current_password:
         raise HTTPException(status_code=400, detail="현재 비밀번호가 올바르지 않습니다.")
 
-    # 비밀번호 변경
     department_to_update.password = new_password
 
     db.commit()
@@ -116,8 +110,11 @@ def get_user_id(department_name: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="부서를 찾을 수 없습니다.")
 
     return {"user_id": department.user_id}
-################################################
 
+################### 부서 관리[끝] ###################
+
+################ 결과 저장, 조회[시작] ################
+# 결과 excel 저장
 @app.post("/results_add_from_excel/")
 def add_results_from_excel(db: Session = Depends(get_db)):
     try:
@@ -135,7 +132,6 @@ def add_results_from_excel(db: Session = Depends(get_db)):
             task = row["업무"] if pd.notna(row["업무"]) else "알 수 없음"
             type_ = row["분류"] if pd.notna(row["분류"]) else "알 수 없음"
 
-            # 날짜 데이터 처리
             try:
                 announcement_date = (
                     datetime.strptime(row["공고일"], "%Y-%m-%d").date()
@@ -166,7 +162,6 @@ def add_results_from_excel(db: Session = Depends(get_db)):
             if existing_result:
                 continue
 
-            # 새 데이터 생성 및 삽입
             new_result = SearchResult(
                 user_id=user_id,
                 site_name=site_name,
@@ -196,6 +191,32 @@ def add_results_from_excel(db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Excel 파일을 찾을 수 없습니다.")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"에러가 발생했습니다: {str(e)}")
+
+# 조회 API - user_id, 키워드, 사이트, 시작날짜, 종료날짜로 검색
+@app.post("/search_results/", response_model=List[SearchResultBase])
+def get_search_results(
+    user_id: str, 
+    keywords: List[str],  
+    site_names: List[str],
+    start_date: datetime, 
+    end_date: datetime,
+    db: Session = Depends(get_db)
+):
+    results = db.query(SearchResult).filter(
+        SearchResult.keyword.in_(keywords),  
+        SearchResult.site_name.in_(site_names),  
+        SearchResult.announcement_date.between(start_date, end_date) 
+    ).all()
+
+    print(results)
+
+    if not results:
+        raise HTTPException(status_code=404, detail="일치하는 데이터를 찾을 수 없습니다.")
+
+    return results
+################ 결과 저장, 조회[끝] ################
+
+################# 키워드 관리[시작] #################
 # 키워드 추가
 @app.post("/keyword_add/")
 def add_keyword(result: keyword, db: Session = Depends(get_db)):
@@ -226,31 +247,7 @@ def delete_keyword(delete_data: keyword, db: Session = Depends(get_db)):
     else:
         raise HTTPException(status_code=404, detail="해당 키워드를 찾을 수 없습니다.")
 
-
-# 조회 API - user_id, 키워드, 사이트, 시작날짜, 종료날짜로 검색
-@app.post("/search_results/", response_model=List[SearchResultBase])
-def get_search_results(
-    user_id: str, 
-    keywords: List[str],  
-    site_names: List[str],
-    start_date: datetime, 
-    end_date: datetime,
-    db: Session = Depends(get_db)
-):
-    # SQLAlchemy 쿼리로 조건에 맞는 데이터 조회
-    results = db.query(SearchResult).filter(
-        SearchResult.keyword.in_(keywords),  
-        SearchResult.site_name.in_(site_names),  
-        SearchResult.announcement_date.between(start_date, end_date) 
-    ).all()
-
-    print(results)
-
-    if not results:
-        raise HTTPException(status_code=404, detail="일치하는 데이터를 찾을 수 없습니다.")
-
-    return results
-
+# 부서별 키워드 가져오기
 @app.get("/keywords/")
 def get_keywords(user_id: str, db: Session = Depends(get_db)):
     keywords = db.query(KeywordResult).filter(KeywordResult.user_id == user_id).all()
@@ -259,6 +256,9 @@ def get_keywords(user_id: str, db: Session = Depends(get_db)):
         for keyword in keywords
     ]
 
+################# 키워드 관리[끝] #################
+
+################# 즐겨찾기 관리[시작] #################
 # 즐겨찾기 추가
 @app.post("/favorites/add/")
 def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
@@ -266,7 +266,6 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
     즐겨찾기 항목 추가
     """
     try:
-        # 이미 존재하는 즐겨찾기 확인
         existing_favorite = db.query(FavoriteResult).filter(
             FavoriteResult.user_id == favorite_data.user_id,
             FavoriteResult.title == favorite_data.title
@@ -275,7 +274,6 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
         if existing_favorite:
             return {"message": "이미 즐겨찾기에 추가된 항목입니다.", "data": existing_favorite}
 
-        # 새 즐겨찾기 데이터 생성
         new_favorite = FavoriteResult(
             user_id=favorite_data.user_id,
             site_name=favorite_data.site_name,
@@ -299,6 +297,7 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
+    
 # 즐겨찾기 삭제
 @app.delete("/favorites/delete/")
 def delete_favorite(user_id: str, title: str, db: Session = Depends(get_db)):
@@ -357,7 +356,9 @@ def get_favorites(user_id: str, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
     
+################# 즐겨찾기 관리[끝] #################
 
+################## DB 관리[시작] ###################
 @app.post("/admin/reset-database")
 def reset_database(db: Session = Depends(get_db)):
     """
@@ -372,3 +373,5 @@ def reset_database(db: Session = Depends(get_db)):
     except Exception as e:
         db.rollback()  
         raise HTTPException(status_code=500, detail=f"데이터베이스 초기화 중 오류가 발생했습니다: {str(e)}")
+
+################## DB 관리[끝] ###################

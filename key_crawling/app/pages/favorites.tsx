@@ -21,6 +21,7 @@ type FavoriteItem = {
   created_at: string;
 };
 
+// 즐겨찾기 목록 조회 페이지ㄴ
 const FavoritesPage: React.FC = () => {
   const { userId } = useUser();
   const router = useRouter();
@@ -28,7 +29,6 @@ const FavoritesPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [selectedItem, setSelectedItem] = useState<FavoriteItem | null>(null);
 
-  // API 호출 함수
   const fetchFavorites = async () => {
     try {
       setLoading(true);
@@ -46,7 +46,6 @@ const FavoritesPage: React.FC = () => {
     }
   };
 
-  // 삭제 확인 및 항목 삭제
   const confirmDelete = (item: FavoriteItem) => {
     Alert.alert(
       '삭제 확인',
@@ -79,14 +78,13 @@ const FavoritesPage: React.FC = () => {
       }
 
       Alert.alert('Success', '항목이 삭제되었습니다.');
-      fetchFavorites(); // 삭제 후 목록 새로고침
+      fetchFavorites(); 
     } catch (error) {
       console.error('Error deleting favorite:', error);
       Alert.alert('Error', '항목을 삭제할 수 없습니다.');
     }
   };
 
-  // 페이지 focus 시 API 호출
   useFocusEffect(
     React.useCallback(() => {
       fetchFavorites();

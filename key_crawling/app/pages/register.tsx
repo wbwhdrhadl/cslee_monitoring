@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, Pressable, ScrollView, ActivityIndicator, Alert } from 'react-native';
 import { FontAwesome, MaterialIcons } from '@expo/vector-icons';
-import { useUser } from '../UserContext'; // UserContext에서 useUser 가져오기
+import { useUser } from '../UserContext'; 
 
+// 사이트별 키워드 등록 페이지
 const KeywordRegistrationPage = () => {
-  const { userId } = useUser(); // UserContext에서 userId 가져오기
+  const { userId } = useUser(); 
   const [keywordsBySite, setKeywordsBySite] = useState({
     나라장터: [],
     나라장터사전공고: [],
@@ -24,7 +25,6 @@ const KeywordRegistrationPage = () => {
   const [currentKeyword, setCurrentKeyword] = useState('');
   const [selectedSite, setSelectedSite] = useState('');
 
-  // 페이지 로드 시 초기 데이터 가져오기
   useEffect(() => {
     const fetchKeywords = async () => {
       try {

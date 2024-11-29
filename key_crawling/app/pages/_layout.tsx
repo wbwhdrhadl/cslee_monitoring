@@ -3,6 +3,7 @@ import { Tabs } from 'expo-router';
 import { FontAwesome } from '@expo/vector-icons';
 import { UserProvider } from '../UserContext';
 
+// 기본 앱 페이지 세팅
 export default function Layout() {
   return (
     <UserProvider>

@@ -5,13 +5,13 @@ import { useRouter } from 'expo-router';
 import { useUser } from '../UserContext';
 import { useFocusEffect } from '@react-navigation/native';
 
+// 관리자 페이지 - 관리자로 로그인 했을때만 활성화
 const AdminPage = () => {
-  const { userId } = useUser(); // UserContext에서 userId 가져오기
-  const router = useRouter(); // Router 사용
+  const { userId } = useUser(); 
+  const router = useRouter(); 
 
   useFocusEffect(
     useCallback(() => {
-      // 페이지가 화면에 포커스될 때마다 실행
       if (userId !== '6') {
         Alert.alert(
           '접근 불가',
@@ -19,19 +19,19 @@ const AdminPage = () => {
           [
             {
               text: '확인',
-              onPress: () => router.push('./main'), // 메인 페이지로 이동
+              onPress: () => router.push('./main'),
             },
           ],
-          { cancelable: false } // Alert를 반드시 처리하게 함
+          { cancelable: false } 
         );
       } else {
         Alert.alert('환영합니다', '관리자 페이지에 접속하셨습니다.');
       }
-    }, [userId, router]) // 의존성 배열에 userId와 router 추가
+    }, [userId, router]) 
   );
 
   const handleUserManagement = () => {
-    router.push('/department'); // department 페이지로 이동
+    router.push('/department'); 
   };
 
   const handleFileManagement = () => {
@@ -40,7 +40,6 @@ const AdminPage = () => {
 
   const handleResetDatabase = async () => {
     try {
-      // API 호출
       const response = await fetch('http://192.168.0.4:5001/admin/reset-database', {
         method: 'POST',
         headers: {
@@ -63,7 +62,7 @@ const AdminPage = () => {
 
   return (
     <View style={styles.container}>
-      {userId === '6' && ( // user_id가 6일 경우에만 페이지 렌더링
+      {userId === '6' && ( 
         <>
           <Text style={styles.title}>관리자 페이지</Text>
           <Text style={styles.subTitle}>관리자를 위한 페이지 입니다</Text>

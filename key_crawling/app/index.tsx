@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TextInput, Button, Alert } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 import { useRouter } from 'expo-router';
 
+// 로그인 페이지 (앱 접속 첫화면)
 const LoginPage = () => {
   const [selectedDepartment, setSelectedDepartment] = useState(null);
   const [password, setPassword] = useState('');
@@ -21,7 +22,7 @@ const LoginPage = () => {
       )}&password=${encodeURIComponent(password)}`;
   
       const response = await fetch(url, {
-        method: 'POST', // POST 요청, 쿼리 매개변수를 URL에 포함
+        method: 'POST', 
         headers: {
           'Content-Type': 'application/json',
         },
@@ -45,11 +46,10 @@ const LoginPage = () => {
                   const userIdData = await userIdResponse.json();
   
                   if (userIdResponse.ok) {
-                    // user_id를 router에 전달하여 페이지 이동
                     router.push({
                       pathname: '/pages/main',
                       params: {
-                        user_id: userIdData.user_id, // user_id 전달
+                        user_id: userIdData.user_id, 
                       },
                     });
                   } else {
