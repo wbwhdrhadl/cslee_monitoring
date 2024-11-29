@@ -5,7 +5,7 @@ import { FontAwesome } from '@expo/vector-icons';
 import { Linking } from 'react-native';
 import { useUser } from '../UserContext'; // UserContext에서 userId 가져오기
 
-// ListItem 컴포넌트 분리
+// ListItem 컴포넌트
 const ListItem = ({ item, isFavorite, onFavoritePress, onSelectItem }) => (
   <Pressable
     style={styles.listItem}
@@ -37,48 +37,46 @@ const ResultPage = () => {
   const { results } = useLocalSearchParams();
   const [data, setData] = useState([]);
   const [selectedItem, setSelectedItem] = useState(null);
-  const [favorites, setFavorites] = useState({}); // favorites 상태를 객체로 초기화
+  const [favorites, setFavorites] = useState({}); // 즐겨찾기 상태를 객체로 초기화
 
   useEffect(() => {
-    console.log('Results received:', results);
     if (results) {
-      const parsedData = JSON.parse(results);
-      const updatedData = parsedData.map((item, index) => ({
-        ...item,
-        id: item.id || index, // id가 없으면 index로 대체
-      }));
-      setData(updatedData);
+      try {
+        const parsedData = JSON.parse(results);
+        const updatedData = parsedData.map((item, index) => ({
+          ...item,
+          id: item.id || index, // id가 없으면 index로 대체
+        }));
+        setData(updatedData);
 
-      const initialFavorites = updatedData.reduce((acc, item) => {
-        acc[item.id] = false;
-        return acc;
-      }, {});
-      setFavorites(initialFavorites);
+        const initialFavorites = updatedData.reduce((acc, item) => {
+          acc[item.id] = false;
+          return acc;
+        }, {});
+        setFavorites(initialFavorites);
+      } catch (error) {
+        console.error('Error parsing results:', error);
+      }
     }
   }, [results]);
 
   const handleSelectItem = (item) => {
-    console.log('Item selected:', item);
     setSelectedItem(item);
   };
 
   const handleClosePopup = () => {
-    console.log('Popup closed');
     setSelectedItem(null);
   };
 
   const handleFavorite = async (item) => {
-    console.log('Toggling favorite for item:', item);
     const isCurrentlyFavorite = favorites[item.id];
 
-    // API 요청을 통해 즐겨찾기 상태 업데이트
     try {
       if (isCurrentlyFavorite) {
         await removeFavorite(item.id, userId);
       } else {
         await addFavorite({ ...item, user_id: userId });
       }
-      // 로컬 상태 업데이트
       setFavorites((prevFavorites) => ({
         ...prevFavorites,
         [item.id]: !isCurrentlyFavorite,
@@ -90,54 +88,48 @@ const ResultPage = () => {
   };
 
   const addFavorite = async (item) => {
-    try {
-      const response = await fetch('http://192.168.0.4:5001/favorites/add/', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(item),
-      });
-      if (!response.ok) {
-        throw new Error('Failed to add favorite');
-      }
-      console.log('Favorite added successfully:', item);
-    } catch (error) {
-      console.error('Error adding favorite:', error);
-      throw error;
+    const response = await fetch('http://192.168.0.4:5001/favorites/add/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(item),
+    });
+    if (!response.ok) {
+      throw new Error('Failed to add favorite');
     }
   };
 
-  const removeFavorite = async (id, userId) => {
+  const removeFavorite = async (item, userId) => {
     try {
       const response = await fetch(
-        http://192.168.0.4:5001/favorites/delete/?id=${id}&user_id=${userId},
-        {
-          method: 'DELETE',
-        }
+        `http://192.168.0.4:5001/favorites/delete/?user_id=${userId}&title=${encodeURIComponent(item.title)}`,
+        { method: 'DELETE' }
       );
+  
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response from server:', errorText);
         throw new Error('Failed to remove favorite');
       }
-      console.log('Favorite removed successfully:', id);
+  
+      console.log('Favorite removed successfully:', title);
     } catch (error) {
       console.error('Error removing favorite:', error);
-      throw error;
+      throw error; // 예외를 호출한 곳으로 전달
     }
   };
+  
 
   return (
     <View style={styles.container}>
-      <Pressable style={styles.topCloseButton} onPress={() => {
-        console.log('Navigating back');
-        router.back();
-      }}>
+      <Pressable style={styles.topCloseButton} onPress={() => router.back()}>
         <FontAwesome name="close" size={24} color="#333" />
       </Pressable>
       <ScrollView contentContainerStyle={styles.scrollContent}>
         <Text style={styles.title}>조회 결과</Text>
         {data.length > 0 ? (
-          data.map((item, index) => (
+          data.map((item) => (
             <ListItem
-              key={item.id ? item-${item.id} : index-${index}}
+              key={item.id} // key 속성 수정
               item={item}
               isFavorite={favorites[item.id]}
               onFavoritePress={handleFavorite}
@@ -149,60 +141,26 @@ const ResultPage = () => {
         )}
       </ScrollView>
 
-
       {selectedItem && (
         <View style={styles.popupOverlay}>
           <View style={styles.popupContainer}>
             <Text style={styles.popupTitle}>{selectedItem.title}</Text>
             <ScrollView>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>구분: </Text>
-                {selectedItem.site_name}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>검색 키워드: </Text>
-                {selectedItem.keyword}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>업무: </Text>
-                {selectedItem.task}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>분류: </Text>
-                {selectedItem.category}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>공고일: </Text>
-                {selectedItem.announcement_date}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>공고기관: </Text>
-                {selectedItem.agency}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>마감일시: </Text>
-                {selectedItem.deadline}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>사업예산: </Text>
-                {selectedItem.budget}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>계약방법: </Text>
-                {selectedItem.contract_method}
-              </Text>
-              <Text style={styles.popupText}>
-                <Text style={styles.popupLabel}>공고문 URL: </Text>
-                <Text
-                  style={{ color: 'blue', textDecorationLine: 'underline' }}
-                  onPress={() => {
-                    console.log('Opening URL:', selectedItem.url); // Log the URL being opened
-                    Linking.openURL(selectedItem.url);
-                  }}
-                >
-                  {selectedItem.url}
+              {Object.entries(selectedItem).map(([key, value]) => (
+                <Text style={styles.popupText} key={key}>
+                  <Text style={styles.popupLabel}>{`${key}: `}</Text>
+                  {key === 'url' ? (
+                    <Text
+                      style={{ color: 'blue', textDecorationLine: 'underline' }}
+                      onPress={() => Linking.openURL(value)}
+                    >
+                      {value}
+                    </Text>
+                  ) : (
+                    value
+                  )}
                 </Text>
-              </Text>
+              ))}
             </ScrollView>
             <Pressable onPress={handleClosePopup} style={styles.closeButton}>
               <Text style={styles.closeButtonText}>닫기</Text>
@@ -215,6 +173,7 @@ const ResultPage = () => {
 };
 
 const styles = StyleSheet.create({
+  // 스타일 정의 (원래와 동일)
   container: {
     flex: 1,
     backgroundColor: '#f5f5f5',
@@ -237,7 +196,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#d1d5db',
     elevation: 2,
-    position: 'relative', // Ensure relative positioning for absolute child elements
+    position: 'relative',
   },
   listItemText: {
     fontSize: 18,
@@ -252,7 +211,7 @@ const styles = StyleSheet.create({
   favoriteButton: {
     position: 'absolute',
     right: 15,
-    bottom: 15, // Place at the bottom-right corner of the listItem
+    bottom: 15,
   },
   popupOverlay: {
     position: 'absolute',

@@ -260,6 +260,7 @@ def get_keywords(user_id: str, db: Session = Depends(get_db)):
         {"site_name": keyword.site_name, "keyword": keyword.keyword}
         for keyword in keywords
     ]
+
 @app.post("/favorites/add/")
 def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
     """
@@ -277,7 +278,6 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
 
         # 새 즐겨찾기 데이터 생성 및 삽입
         new_favorite = FavoriteResult(
-            id = favorite_data.id,
             user_id=favorite_data.user_id,
             site_name=favorite_data.site_name,
             keyword=favorite_data.keyword,
@@ -302,17 +302,18 @@ def add_favorite(favorite_data: FavoriteCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
 
 
-# 즐겨찾기 삭제
 @app.delete("/favorites/delete/")
 def delete_favorite(user_id: str, title: str, db: Session = Depends(get_db)):
     """
     즐겨찾기 항목 삭제
     """
     try:
+        print(f"Received user_id: {user_id}, title: {title}")  # 로그 추가
+
         # 즐겨찾기 항목 검색 및 삭제
         deleted_count = db.query(FavoriteResult).filter(
             FavoriteResult.user_id == user_id,
-            FavoriteResult.title == title
+            FavoriteResult.title == title.strip()  # 필요 시 공백 제거
         ).delete(synchronize_session=False)
 
         if deleted_count == 0:
@@ -323,7 +324,6 @@ def delete_favorite(user_id: str, title: str, db: Session = Depends(get_db)):
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
-
 
 # 즐겨찾기 조회
 @app.get("/favorites/")
