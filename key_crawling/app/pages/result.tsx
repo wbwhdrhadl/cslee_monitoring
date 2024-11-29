@@ -70,13 +70,16 @@ const ResultPage = () => {
 
   const handleFavorite = async (item) => {
     const isCurrentlyFavorite = favorites[item.id];
-
+  
     try {
+      console.log('Toggling favorite for item:', item.title);
+  
       if (isCurrentlyFavorite) {
-        await removeFavorite(item.id, userId);
+        await removeFavorite(item, userId); // `item` 전체 전달
       } else {
         await addFavorite({ ...item, user_id: userId });
       }
+  
       setFavorites((prevFavorites) => ({
         ...prevFavorites,
         [item.id]: !isCurrentlyFavorite,
@@ -86,20 +89,36 @@ const ResultPage = () => {
       Alert.alert('Error', '즐겨찾기 상태를 업데이트할 수 없습니다.');
     }
   };
-
+  
   const addFavorite = async (item) => {
-    const response = await fetch('http://192.168.0.4:5001/favorites/add/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(item),
-    });
-    if (!response.ok) {
-      throw new Error('Failed to add favorite');
+    try {
+      console.log('Adding favorite for:', item.title);
+      const response = await fetch('http://192.168.0.4:5001/favorites/add/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(item),
+      });
+  
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error adding favorite:', errorText);
+        throw new Error('Failed to add favorite');
+      }
+  
+      console.log('Favorite added successfully:', item.title);
+    } catch (error) {
+      console.error('Error in addFavorite:', error);
+      throw error;
     }
   };
-
+  
   const removeFavorite = async (item, userId) => {
     try {
+      if (!item.title) {
+        throw new Error('Item title is missing');
+      }
+  
+      console.log('Removing favorite for:', item.title);
       const response = await fetch(
         `http://192.168.0.4:5001/favorites/delete/?user_id=${userId}&title=${encodeURIComponent(item.title)}`,
         { method: 'DELETE' }
@@ -111,10 +130,10 @@ const ResultPage = () => {
         throw new Error('Failed to remove favorite');
       }
   
-      console.log('Favorite removed successfully:', title);
+      console.log('Favorite removed successfully:', item.title);
     } catch (error) {
-      console.error('Error removing favorite:', error);
-      throw error; // 예외를 호출한 곳으로 전달
+      console.error('Error in removeFavorite:', error);
+      throw error;
     }
   };
   
