@@ -321,19 +321,15 @@ def delete_favorite(user_id: str, title: str, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
 
-# 즐겨찾기 조회
 @app.get("/favorites/")
 def get_favorites(user_id: str, db: Session = Depends(get_db)):
     """
     사용자별 즐겨찾기 조회
     """
     try:
-
         favorites = db.query(FavoriteResult).filter(FavoriteResult.user_id == user_id).all()
 
-        if not favorites:
-            raise HTTPException(status_code=404, detail="즐겨찾기 항목이 없습니다.")
-
+        # 즐겨찾기가 없을 경우 빈 리스트 반환
         return [
             {
                 "id": favorite.id,
@@ -354,7 +350,8 @@ def get_favorites(user_id: str, db: Session = Depends(get_db)):
         ]
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"에러 발생: {str(e)}")
+        # 예외 발생 시 500 에러 반환
+        raise HTTPException(status_code=500, detail=f"서버 오류: {str(e)}")
     
 ################# 즐겨찾기 관리[끝] #################
 

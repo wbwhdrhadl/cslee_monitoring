@@ -33,18 +33,25 @@ const FavoritesPage: React.FC = () => {
     try {
       setLoading(true);
       const response = await fetch(`http://192.168.0.4:5001/favorites?user_id=${userId}`);
-      if (!response.ok) {
-        throw new Error('Failed to fetch favorites');
+  
+      if (response.ok) {
+        const data = await response.json();
+        setFavorites(data); // 빈 배열도 그대로 설정
+      } else {
+        console.warn('즐겨찾기 데이터를 가져오지 못했습니다.');
+        setFavorites([]); // 빈 배열 설정
       }
-      const data = await response.json();
-      setFavorites(data);
+  
       setLoading(false);
     } catch (error) {
       console.error('Error fetching favorites:', error);
-      Alert.alert('Error', '즐겨찾기 데이터를 불러올 수 없습니다.');
+      // 에러 발생 시에도 빈 배열로 설정
+      setFavorites([]);
       setLoading(false);
     }
   };
+  
+  
 
   const confirmDelete = (item: FavoriteItem) => {
     Alert.alert(
