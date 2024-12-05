@@ -1,10 +1,13 @@
 ## 파일 경로 정리
 
 - 📁 `backend-fastapi` : [BACK-END]
+   - 📁 crawling
+       - 📁 result : 크롤링 결과가 저장되는 폴더
    - 📁 `__pycache__`
    - 📁 models : 모델 정의, 데이터 연결 폴더 모음
    - 📄 `__init__.py`
    - 📄 `app.py` : API 연결 파일
+   - 📄 `crawling_later.py` : airflow 연결 파일 (크롤링 예약 실행 파일)
 
 - 📁 `key_crawling` : [FRONT-END] 
   - 📁 `assets`
